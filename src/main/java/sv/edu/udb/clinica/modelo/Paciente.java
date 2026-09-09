@@ -89,5 +89,9 @@ public class Paciente {
     public String getNombreCompleto() {
         return nombres + " " + apellidos;
     }
+
+    public void setDireccion(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }
 
