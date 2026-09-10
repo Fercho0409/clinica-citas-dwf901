@@ -7,6 +7,7 @@ import java.time.LocalDate;
  */
 public class Paciente {
 
+    private String direccion;
     private int idPaciente;
     private String nombres;
     private String apellidos;
@@ -90,8 +91,12 @@ public class Paciente {
         return nombres + " " + apellidos;
     }
 
-    public void setDireccion(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
     }
 }
 
