@@ -9,7 +9,10 @@
         <h1>Sistema de Gestion de Citas</h1>
         <p>Proyecto DWF901 - Fase 1</p>
         <ul>
-            <li><a href="prueba-conexion">Probar conexion a la base de datos</a></li>
+            <li><a href="pacientes">Gestión de Pacientes</a></li>
+            <li><a href="medicos">Gestión de Médicos</a></li>
+            <li><a href="prueba-conexion">Probar conexión a la base de datos</a></li>
+        </ul>
         </ul>
     </body>
 </html>

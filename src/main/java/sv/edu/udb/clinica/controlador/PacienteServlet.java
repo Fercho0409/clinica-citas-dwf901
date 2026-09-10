@@ -29,7 +29,7 @@ public class PacienteServlet extends HttpServlet {
             case "listar":
                 List<Paciente> listaPacientes = pacienteDAO.listarPacientes();
                 request.setAttribute("listaPacientes", listaPacientes);
-                request.getRequestDispatcher("/views/pacientes/listado.jsp").forward(request, response);
+                request.getRequestDispatcher("/views/pacientes/listar.jsp").forward(request, response);
                 break;
 
             case "nuevo":
