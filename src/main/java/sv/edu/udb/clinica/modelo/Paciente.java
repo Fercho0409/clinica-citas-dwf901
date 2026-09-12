@@ -7,6 +7,7 @@ import java.time.LocalDate;
  */
 public class Paciente {
 
+    private String direccion;
     private int idPaciente;
     private String nombres;
     private String apellidos;
@@ -88,6 +89,14 @@ public class Paciente {
     /** Metodo de conveniencia para mostrar el nombre completo en las vistas. */
     public String getNombreCompleto() {
         return nombres + " " + apellidos;
+    }
+
+        public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
     }
 }
 
