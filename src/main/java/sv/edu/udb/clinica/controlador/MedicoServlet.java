@@ -1,6 +1,7 @@
 package sv.edu.udb.clinica.controlador;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -27,10 +28,16 @@ public class MedicoServlet extends HttpServlet {
 
         switch (accion) {
             case "listar":
-                List<Medico> listaMedicos = medicoDAO.listarMedicos();
+                List<Medico> listaMedicos = null;
+            try {
+                listaMedicos = medicoDAO.listarMedicos();
+            } catch (SQLException ex) {
+                System.getLogger(MedicoServlet.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            }
                 request.setAttribute("listaMedicos", listaMedicos);
                 request.getRequestDispatcher("/views/medicos/listado.jsp").forward(request, response);
                 break;
+
 
             case "nuevo":
                 request.getRequestDispatcher("/views/medicos/formulario.jsp").forward(request, response);
