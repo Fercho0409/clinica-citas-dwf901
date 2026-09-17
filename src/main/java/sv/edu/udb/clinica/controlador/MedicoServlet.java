@@ -35,15 +35,18 @@ public class MedicoServlet extends HttpServlet {
                     break;
 
                 case "nuevo":
+                    request.setAttribute("listaEspecialidades", medicoDAO.listarEspecialidades());
                     request.getRequestDispatcher("/views/medicos/formulario.jsp").forward(request, response);
                     break;
 
-                case "editar":
+               case "editar":
                     int idEdit = Integer.parseInt(request.getParameter("id"));
                     Medico medicoAEditar = medicoDAO.buscarPorId(idEdit); 
                     request.setAttribute("medico", medicoAEditar);
+                    request.setAttribute("listaEspecialidades", medicoDAO.listarEspecialidades());
                     request.getRequestDispatcher("/views/medicos/formulario.jsp").forward(request, response);
                     break;
+                    
 
                 case "eliminar":
                     int idEliminar = Integer.parseInt(request.getParameter("id"));

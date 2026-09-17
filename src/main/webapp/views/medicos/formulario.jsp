@@ -34,10 +34,17 @@
                 <input type="text" class="form-control" id="jvpm" name="jvpm" value="${medico.jvpm}" required>
             </div>
 
-            <div class="mb-3">
-                <label for="idEspecialidad" class="form-label">Especialidad (ID):</label>
-                <input type="number" class="form-control" id="idEspecialidad" name="idEspecialidad" value="${medico.especialidad.idEspecialidad}" placeholder="Ej: 1, 2, 3..." required>
-                <div class="form-text">Ingresa el ID numérico de la especialidad correspondiente.</div>
+                        <div class="mb-3">
+                <label for="idEspecialidad" class="form-label">Especialidad:</label>
+                <select class="form-select" id="idEspecialidad" name="idEspecialidad" required>
+                    <option value="">-- Seleccione una especialidad --</option>
+                    <c:forEach var="esp" items="${listaEspecialidades}">
+                        <option value="${esp.idEspecialidad}"
+                            <c:if test="${medico.especialidad.idEspecialidad == esp.idEspecialidad}">selected</c:if>>
+                            ${esp.nombre}
+                        </option>
+                    </c:forEach>
+                </select>
             </div>
 
             <div class="mb-3">

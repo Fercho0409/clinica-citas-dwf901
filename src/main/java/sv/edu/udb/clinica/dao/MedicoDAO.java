@@ -15,14 +15,12 @@ public class MedicoDAO {
     public List<Medico> listarMedicos() throws SQLException {
         List<Medico> lista = new ArrayList<>();
         // Cambiamos m.jvpm por m.dui
-        String sql = "SELECT m.id_medico, m.nombres, m.apellidos, m.dui, m.telefono, m.correo, " +
-                     "m.id_especialidad, e.nombre AS nombre_especialidad " +
-                     "FROM medicos m JOIN especialidades e ON m.id_especialidad = e.id_especialidad";
-        
-        try (Connection conn = ConexionBD.obtenerConexion();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-             
+        String sql = "SELECT m.id_medico, m.nombres, m.apellidos, m.dui, m.telefono, m.correo, "
+                + "m.id_especialidad, e.nombre AS nombre_especialidad "
+                + "FROM medicos m JOIN especialidades e ON m.id_especialidad = e.id_especialidad";
+
+        try (Connection conn = ConexionBD.obtenerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+
             while (rs.next()) {
                 Medico medico = new Medico();
                 medico.setIdMedico(rs.getInt("id_medico"));
@@ -31,12 +29,12 @@ public class MedicoDAO {
                 medico.setJvpm(rs.getString("dui")); // Mapeamos el campo dui al atributo jvpm del modelo
                 medico.setTelefono(rs.getString("telefono"));
                 medico.setCorreo(rs.getString("correo"));
-                
+
                 Especialidad esp = new Especialidad();
                 esp.setIdEspecialidad(rs.getInt("id_especialidad"));
                 esp.setNombre(rs.getString("nombre_especialidad"));
                 medico.setEspecialidad(esp);
-                
+
                 lista.add(medico);
             }
         }
@@ -45,14 +43,13 @@ public class MedicoDAO {
 
     public Medico buscarPorId(int idMedico) throws SQLException {
         Medico medico = null;
-        String sql = "SELECT m.id_medico, m.nombres, m.apellidos, m.dui, m.telefono, m.correo, " +
-                     "m.id_especialidad, e.nombre AS nombre_especialidad " +
-                     "FROM medicos m JOIN especialidades e ON m.id_especialidad = e.id_especialidad " +
-                     "WHERE m.id_medico = ?";
-        
-        try (Connection conn = ConexionBD.obtenerConexion();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-             
+        String sql = "SELECT m.id_medico, m.nombres, m.apellidos, m.dui, m.telefono, m.correo, "
+                + "m.id_especialidad, e.nombre AS nombre_especialidad "
+                + "FROM medicos m JOIN especialidades e ON m.id_especialidad = e.id_especialidad "
+                + "WHERE m.id_medico = ?";
+
+        try (Connection conn = ConexionBD.obtenerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, idMedico);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -63,7 +60,7 @@ public class MedicoDAO {
                     medico.setJvpm(rs.getString("dui"));
                     medico.setTelefono(rs.getString("telefono"));
                     medico.setCorreo(rs.getString("correo"));
-                    
+
                     Especialidad esp = new Especialidad();
                     esp.setIdEspecialidad(rs.getInt("id_especialidad"));
                     esp.setNombre(rs.getString("nombre_especialidad"));
@@ -76,58 +73,71 @@ public class MedicoDAO {
 
     public boolean insertar(Medico medico) throws SQLException {
         String sql = "INSERT INTO medicos (nombres, apellidos, dui, telefono, correo, id_especialidad) VALUES (?, ?, ?, ?, ?, ?)";
-        
-        try (Connection conn = ConexionBD.obtenerConexion();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-             
+
+        try (Connection conn = ConexionBD.obtenerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, medico.getNombres());
             pstmt.setString(2, medico.getApellidos());
             pstmt.setString(3, medico.getJvpm()); // Obtenemos el valor del modelo
             pstmt.setString(4, medico.getTelefono());
             pstmt.setString(5, medico.getCorreo());
-            
+
             if (medico.getEspecialidad() != null) {
                 pstmt.setInt(6, medico.getEspecialidad().getIdEspecialidad());
             } else {
                 pstmt.setNull(6, java.sql.Types.INTEGER);
             }
-            
+
             return pstmt.executeUpdate() > 0;
         }
     }
 
     public boolean actualizar(Medico medico) throws SQLException {
         String sql = "UPDATE medicos SET nombres = ?, apellidos = ?, dui = ?, telefono = ?, correo = ?, id_especialidad = ? WHERE id_medico = ?";
-        
-        try (Connection conn = ConexionBD.obtenerConexion();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-             
+
+        try (Connection conn = ConexionBD.obtenerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, medico.getNombres());
             pstmt.setString(2, medico.getApellidos());
             pstmt.setString(3, medico.getJvpm());
             pstmt.setString(4, medico.getTelefono());
             pstmt.setString(5, medico.getCorreo());
-            
+
             if (medico.getEspecialidad() != null) {
                 pstmt.setInt(6, medico.getEspecialidad().getIdEspecialidad());
             } else {
                 pstmt.setNull(6, java.sql.Types.INTEGER);
             }
-            
+
             pstmt.setInt(7, medico.getIdMedico());
-            
+
             return pstmt.executeUpdate() > 0;
         }
     }
 
     public boolean eliminar(int idMedico) throws SQLException {
         String sql = "DELETE FROM medicos WHERE id_medico = ?";
-        
-        try (Connection conn = ConexionBD.obtenerConexion();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-             
+
+        try (Connection conn = ConexionBD.obtenerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, idMedico);
             return pstmt.executeUpdate() > 0;
         }
+    }
+
+    public List<Especialidad> listarEspecialidades() throws SQLException {
+        List<Especialidad> lista = new ArrayList<>();
+        String sql = "SELECT id_especialidad, nombre FROM especialidades ORDER BY nombre";
+
+        try (Connection conn = ConexionBD.obtenerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Especialidad esp = new Especialidad();
+                esp.setIdEspecialidad(rs.getInt("id_especialidad"));
+                esp.setNombre(rs.getString("nombre"));
+                lista.add(esp);
+            }
+        }
+        return lista;
     }
 }

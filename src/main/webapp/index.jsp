@@ -24,10 +24,10 @@
                     <a href="${pageContext.request.contextPath}/medicos?accion=listar" class="btn btn-primary btn-lg">
                         👨‍⚕️ Gestión de Médicos
                     </a>
-                    <a href="pacientes" class="btn btn-outline-secondary btn-lg">
+                    <a href="${pageContext.request.contextPath}/pacientes?accion=listar" class="btn btn-outline-secondary btn-lg">
                         👥 Gestión de Pacientes
                     </a>
-                    <a href="conexion.jsp" class="btn btn-outline-info btn-lg">
+                    <a href="${pageContext.request.contextPath}/prueba-conexion" class="btn btn-outline-info btn-lg">
                         🔌 Probar Conexión BD
                     </a>
                 </div>
