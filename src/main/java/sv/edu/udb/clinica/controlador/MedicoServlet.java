@@ -91,19 +91,25 @@ public class MedicoServlet extends HttpServlet {
             medico.setEspecialidad(esp);
         }
 
-        try {
+              try {
             if (idStr == null || idStr.trim().isEmpty()) {
-                // Guardar nuevo registro
                 medicoDAO.insertar(medico);
             } else {
-                // Actualizar registro existente
                 medico.setIdMedico(Integer.parseInt(idStr));
                 medicoDAO.actualizar(medico);
             }
+            response.sendRedirect(request.getContextPath() + "/medicos?accion=listar");
+
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            String mensaje;
+            if (ex.getMessage() != null && ex.getMessage().contains("Duplicate entry")) {
+                mensaje = "Ya existe un médico registrado con el DUI " + jvpm + ".";
+            } else {
+                mensaje = "No se pudo guardar el médico: " + ex.getMessage();
+            }
+            request.setAttribute("mensaje", mensaje);
+            request.getRequestDispatcher("/views/mensajes/error.jsp").forward(request, response);
         }
 
-        response.sendRedirect(request.getContextPath() + "/medicos?accion=listar");
     }
 }

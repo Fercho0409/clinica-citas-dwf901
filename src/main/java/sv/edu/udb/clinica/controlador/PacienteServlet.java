@@ -89,19 +89,26 @@ public class PacienteServlet extends HttpServlet {
         paciente.setCorreo(correo);
         paciente.setDireccion(direccion);
 
-        try {
+                try {
             if (idStr == null || idStr.trim().isEmpty()) {
                 // Guardar nuevo registro
-                pacienteDAO.insertar(paciente); // Llamada corregida
+                pacienteDAO.insertar(paciente);
             } else {
                 // Actualizar registro existente
                 paciente.setIdPaciente(Integer.parseInt(idStr));
-                pacienteDAO.actualizar(paciente); // Llamada corregida
+                pacienteDAO.actualizar(paciente);
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+            response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");
 
-        response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");
+        } catch (SQLException ex) {
+            String mensaje;
+            if (ex.getMessage() != null && ex.getMessage().contains("Duplicate entry")) {
+                mensaje = "Ya existe un paciente registrado con el DUI " + dui + ".";
+            } else {
+                mensaje = "No se pudo guardar el paciente: " + ex.getMessage();
+            }
+            request.setAttribute("mensaje", mensaje);
+            request.getRequestDispatcher("/views/mensajes/error.jsp").forward(request, response);
+        }
     }
 }
