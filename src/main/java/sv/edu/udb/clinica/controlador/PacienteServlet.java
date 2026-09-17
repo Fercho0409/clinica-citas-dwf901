@@ -75,6 +75,13 @@ public class PacienteServlet extends HttpServlet {
         String telefono = request.getParameter("telefono");
         String correo = request.getParameter("correo");
         String direccion = request.getParameter("direccion");
+                if (nombres == null || nombres.trim().isEmpty()
+                || apellidos == null || apellidos.trim().isEmpty()
+                || dui == null || dui.trim().isEmpty()) {
+            request.setAttribute("mensaje", "Los nombres, apellidos y DUI son obligatorios.");
+            request.getRequestDispatcher("/views/mensajes/error.jsp").forward(request, response);
+            return;
+        }
 
         Paciente paciente = new Paciente();
         paciente.setNombres(nombres);
