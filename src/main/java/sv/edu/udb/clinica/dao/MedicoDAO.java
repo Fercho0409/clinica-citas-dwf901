@@ -14,8 +14,8 @@ public class MedicoDAO {
 
     public List<Medico> listarMedicos() throws SQLException {
         List<Medico> lista = new ArrayList<>();
-        // Hacemos JOIN con especialidades para traer el objeto completo como pide el POJO
-        String sql = "SELECT m.id_medico, m.nombres, m.apellidos, m.jvpm, m.telefono, m.correo, " +
+        // Cambiamos m.jvpm por m.dui
+        String sql = "SELECT m.id_medico, m.nombres, m.apellidos, m.dui, m.telefono, m.correo, " +
                      "m.id_especialidad, e.nombre AS nombre_especialidad " +
                      "FROM medicos m JOIN especialidades e ON m.id_especialidad = e.id_especialidad";
         
@@ -28,11 +28,10 @@ public class MedicoDAO {
                 medico.setIdMedico(rs.getInt("id_medico"));
                 medico.setNombres(rs.getString("nombres"));
                 medico.setApellidos(rs.getString("apellidos"));
-                medico.setJvpm(rs.getString("jvpm"));
+                medico.setJvpm(rs.getString("dui")); // Mapeamos el campo dui al atributo jvpm del modelo
                 medico.setTelefono(rs.getString("telefono"));
                 medico.setCorreo(rs.getString("correo"));
                 
-                // Mapeamos el objeto Especialidad completo
                 Especialidad esp = new Especialidad();
                 esp.setIdEspecialidad(rs.getInt("id_especialidad"));
                 esp.setNombre(rs.getString("nombre_especialidad"));
@@ -46,7 +45,7 @@ public class MedicoDAO {
 
     public Medico buscarPorId(int idMedico) throws SQLException {
         Medico medico = null;
-        String sql = "SELECT m.id_medico, m.nombres, m.apellidos, m.jvpm, m.telefono, m.correo, " +
+        String sql = "SELECT m.id_medico, m.nombres, m.apellidos, m.dui, m.telefono, m.correo, " +
                      "m.id_especialidad, e.nombre AS nombre_especialidad " +
                      "FROM medicos m JOIN especialidades e ON m.id_especialidad = e.id_especialidad " +
                      "WHERE m.id_medico = ?";
@@ -61,7 +60,7 @@ public class MedicoDAO {
                     medico.setIdMedico(rs.getInt("id_medico"));
                     medico.setNombres(rs.getString("nombres"));
                     medico.setApellidos(rs.getString("apellidos"));
-                    medico.setJvpm(rs.getString("jvpm"));
+                    medico.setJvpm(rs.getString("dui"));
                     medico.setTelefono(rs.getString("telefono"));
                     medico.setCorreo(rs.getString("correo"));
                     
@@ -76,14 +75,14 @@ public class MedicoDAO {
     }
 
     public boolean insertar(Medico medico) throws SQLException {
-        String sql = "INSERT INTO medicos (nombres, apellidos, jvpm, telefono, correo, id_especialidad) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO medicos (nombres, apellidos, dui, telefono, correo, id_especialidad) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = ConexionBD.obtenerConexion();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
              
             pstmt.setString(1, medico.getNombres());
             pstmt.setString(2, medico.getApellidos());
-            pstmt.setString(3, medico.getJvpm());
+            pstmt.setString(3, medico.getJvpm()); // Obtenemos el valor del modelo
             pstmt.setString(4, medico.getTelefono());
             pstmt.setString(5, medico.getCorreo());
             
@@ -98,7 +97,7 @@ public class MedicoDAO {
     }
 
     public boolean actualizar(Medico medico) throws SQLException {
-        String sql = "UPDATE medicos SET nombres = ?, apellidos = ?, jvpm = ?, telefono = ?, correo = ?, id_especialidad = ? WHERE id_medico = ?";
+        String sql = "UPDATE medicos SET nombres = ?, apellidos = ?, dui = ?, telefono = ?, correo = ?, id_especialidad = ? WHERE id_medico = ?";
         
         try (Connection conn = ConexionBD.obtenerConexion();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {

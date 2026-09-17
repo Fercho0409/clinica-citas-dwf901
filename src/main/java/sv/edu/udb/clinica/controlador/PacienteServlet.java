@@ -26,34 +26,38 @@ public class PacienteServlet extends HttpServlet {
             accion = "listar";
         }
 
-        switch (accion) {
-            case "listar":
-                List<Paciente> listaPacientes = null;
-            try {
-                listaPacientes = pacienteDAO.listarPacientes();
-            } catch (SQLException ex) {
-                System.getLogger(PacienteServlet.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        try {
+            switch (accion) {
+                case "listar":
+                    List<Paciente> listaPacientes = pacienteDAO.listarPacientes();
+                    request.setAttribute("listaPacientes", listaPacientes);
+                    request.getRequestDispatcher("/views/pacientes/listar.jsp").forward(request, response);
+                    break;
+
+                case "nuevo":
+                    request.getRequestDispatcher("/views/pacientes/formulario.jsp").forward(request, response);
+                    break;
+
+                case "editar":
+                    int idEdit = Integer.parseInt(request.getParameter("id"));
+                    Paciente pacienteAEditar = pacienteDAO.buscarPorId(idEdit); // Llamada corregida
+                    request.setAttribute("paciente", pacienteAEditar);
+                    request.getRequestDispatcher("/views/pacientes/formulario.jsp").forward(request, response);
+                    break;
+
+                case "eliminar":
+                    int idEliminar = Integer.parseInt(request.getParameter("id"));
+                    pacienteDAO.eliminar(idEliminar); // Llamada corregida
+                    response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");
+                    break;
+
+                default:
+                    response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");
+                    break;
             }
-                request.setAttribute("listaPacientes", listaPacientes);
-                request.getRequestDispatcher("/views/pacientes/listar.jsp").forward(request, response);
-                break;
-
-
-            case "nuevo":
-                request.getRequestDispatcher("/views/pacientes/formulario.jsp").forward(request, response);
-                break;
-
-            case "editar":
-                request.getRequestDispatcher("/views/pacientes/formulario.jsp").forward(request, response);
-                break;
-
-            case "eliminar":
-                response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");
-                break;
-
-            default:
-                response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");
-                break;
+        } catch (SQLException | NumberFormatException ex) {
+            ex.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");
         }
     }
 
@@ -70,6 +74,7 @@ public class PacienteServlet extends HttpServlet {
         String fechaNacStr = request.getParameter("fechaNacimiento");
         String telefono = request.getParameter("telefono");
         String correo = request.getParameter("correo");
+        String direccion = request.getParameter("direccion");
 
         Paciente paciente = new Paciente();
         paciente.setNombres(nombres);
@@ -82,12 +87,19 @@ public class PacienteServlet extends HttpServlet {
         
         paciente.setTelefono(telefono);
         paciente.setCorreo(correo);
+        paciente.setDireccion(direccion);
 
-        if (idStr == null || idStr.trim().isEmpty()) {
-            // Guardar nuevo registro
-        } else {
-            // Actualizar registro existente
-            paciente.setIdPaciente(Integer.parseInt(idStr));
+        try {
+            if (idStr == null || idStr.trim().isEmpty()) {
+                // Guardar nuevo registro
+                pacienteDAO.insertar(paciente); // Llamada corregida
+            } else {
+                // Actualizar registro existente
+                paciente.setIdPaciente(Integer.parseInt(idStr));
+                pacienteDAO.actualizar(paciente); // Llamada corregida
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
 
         response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");

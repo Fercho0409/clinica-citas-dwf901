@@ -26,34 +26,38 @@ public class MedicoServlet extends HttpServlet {
             accion = "listar";
         }
 
-        switch (accion) {
-            case "listar":
-                List<Medico> listaMedicos = null;
-            try {
-                listaMedicos = medicoDAO.listarMedicos();
-            } catch (SQLException ex) {
-                System.getLogger(MedicoServlet.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        try {
+            switch (accion) {
+                case "listar":
+                    List<Medico> listaMedicos = medicoDAO.listarMedicos();
+                    request.setAttribute("listaMedicos", listaMedicos);
+                    request.getRequestDispatcher("/views/medicos/listar.jsp").forward(request, response);
+                    break;
+
+                case "nuevo":
+                    request.getRequestDispatcher("/views/medicos/formulario.jsp").forward(request, response);
+                    break;
+
+                case "editar":
+                    int idEdit = Integer.parseInt(request.getParameter("id"));
+                    Medico medicoAEditar = medicoDAO.buscarPorId(idEdit); 
+                    request.setAttribute("medico", medicoAEditar);
+                    request.getRequestDispatcher("/views/medicos/formulario.jsp").forward(request, response);
+                    break;
+
+                case "eliminar":
+                    int idEliminar = Integer.parseInt(request.getParameter("id"));
+                    medicoDAO.eliminar(idEliminar);
+                    response.sendRedirect(request.getContextPath() + "/medicos?accion=listar");
+                    break;
+
+                default:
+                    response.sendRedirect(request.getContextPath() + "/medicos?accion=listar");
+                    break;
             }
-                request.setAttribute("listaMedicos", listaMedicos);
-                request.getRequestDispatcher("/views/medicos/listado.jsp").forward(request, response);
-                break;
-
-
-            case "nuevo":
-                request.getRequestDispatcher("/views/medicos/formulario.jsp").forward(request, response);
-                break;
-
-            case "editar":
-                request.getRequestDispatcher("/views/medicos/formulario.jsp").forward(request, response);
-                break;
-
-            case "eliminar":
-                response.sendRedirect(request.getContextPath() + "/medicos?accion=listar");
-                break;
-
-            default:
-                response.sendRedirect(request.getContextPath() + "/medicos?accion=listar");
-                break;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response.getWriter().println("Error en el servidor: " + ex.getMessage());
         }
     }
 
@@ -84,11 +88,17 @@ public class MedicoServlet extends HttpServlet {
             medico.setEspecialidad(esp);
         }
 
-        if (idStr == null || idStr.trim().isEmpty()) {
-            // Guardar nuevo registro
-        } else {
-            // Actualizar registro existente
-            medico.setIdMedico(Integer.parseInt(idStr));
+        try {
+            if (idStr == null || idStr.trim().isEmpty()) {
+                // Guardar nuevo registro
+                medicoDAO.insertar(medico);
+            } else {
+                // Actualizar registro existente
+                medico.setIdMedico(Integer.parseInt(idStr));
+                medicoDAO.actualizar(medico);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
 
         response.sendRedirect(request.getContextPath() + "/medicos?accion=listar");
