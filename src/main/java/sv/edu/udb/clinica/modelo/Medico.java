@@ -1,4 +1,4 @@
-﻿package sv.edu.udb.clinica.modelo;
+package sv.edu.udb.clinica.modelo;
 
 /**
  * POJO: representa una fila de la tabla medico.
@@ -10,7 +10,7 @@ public class Medico {
     private int idMedico;
     private String nombres;
     private String apellidos;
-    private String dui;
+    private String jvpm;
     private String telefono;
     private String correo;
     private Especialidad especialidad;
@@ -18,12 +18,12 @@ public class Medico {
     public Medico() {
     }
 
-    public Medico(int idMedico, String nombres, String apellidos, String dui,
+    public Medico(int idMedico, String nombres, String apellidos, String jvpm,
                   String telefono, String correo, Especialidad especialidad) {
         this.idMedico = idMedico;
         this.nombres = nombres;
         this.apellidos = apellidos;
-        this.dui = dui;
+        this.jvpm = jvpm;
         this.telefono = telefono;
         this.correo = correo;
         this.especialidad = especialidad;
@@ -53,12 +53,12 @@ public class Medico {
         this.apellidos = apellidos;
     }
 
-    public String getdui() {
-        return dui;
+    public String getJvpm() {
+        return jvpm;
     }
 
-    public void setdui(String dui) {
-        this.dui = dui;
+    public void setJvpm(String jvpm) {
+        this.jvpm = jvpm;
     }
 
     public String getTelefono() {
