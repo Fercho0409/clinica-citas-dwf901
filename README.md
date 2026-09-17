@@ -1,22 +1,23 @@
 # Sistema de Gestión de Citas — Clínica
 
 Proyecto de cátedra de **DWF901 — Desarrollo de Aplicaciones con Web Frameworks**
-Universidad Don Bosco, ciclo II 2026.
+Universidad Don Bosco · Ciclo II 2026
 
-Aplicación Java Web con arquitectura MVC para administrar pacientes, médicos y citas
-de una clínica.
+Aplicación Java Web con arquitectura MVC para administrar pacientes y médicos de una clínica.
+Primer incremento (Fase 1) de un sistema que crecerá durante el ciclo hasta incluir citas,
+servicios REST y seguridad por roles.
 
 ---
 
 ## Integrantes
 
-| # | Nombre | Rol en Fase 1 |
-|---|--------|---------------|
-| 1 | Dani | Vistas JSP / JSTL |
-| 2 | Levi | Servlets / controladores |
-| 3 | Marylin | DAOs y acceso a datos |
-| 4 | Navarro | Base de datos y script SQL |
-| 5 | Fernando | Arquitectura, POJOs, Git y documentación |
+| # | Nombre | Responsabilidad en Fase 1 |
+|---|--------|---------------------------|
+| 1 | Dani | Vistas JSP y JSTL |
+| 2 | Levi | Servlets controladores |
+| 3 | Marylin | Clases DAO y acceso a datos |
+| 4 | Navarro | Diseño de base de datos y script SQL |
+| 5 | Fernando | Arquitectura, POJOs, integración, Git y documentación |
 
 ---
 
@@ -24,13 +25,13 @@ de una clínica.
 
 | Herramienta | Versión | Nota |
 |-------------|---------|------|
-| JDK | 21 (LTS) | Eclipse Adoptium (Temurin) |
-| Apache NetBeans | 29 | Cualquier IDE con soporte Maven funciona |
+| JDK | 21 (LTS) | Eclipse Adoptium / Temurin |
+| Apache NetBeans | 31 | Cualquier IDE con soporte Maven funciona |
 | Apache Tomcat | **9.0.121** | Usa el paquete `javax.servlet` |
 | MySQL Server | 8.4.11 (LTS) | |
 | Maven | Incluido en NetBeans | |
 
-> **Importante:** el proyecto usa `javax.servlet`, no `jakarta.servlet`.
+> **El proyecto usa `javax.servlet`, no `jakarta.servlet`.**
 > Tomcat 10 o superior **no** ejecutará esta aplicación.
 
 ---
@@ -42,9 +43,7 @@ La sincronización bloquea archivos mientras Maven compila y produce errores com
 `Failed to delete ...\target\...` que parecen problemas de código pero no lo son.
 
 Ubicación recomendada: `C:\proyectos\clinica-citas`
-
-Lo mismo aplica a Tomcat: instalarlo en una ruta sin espacios ni tildes,
-por ejemplo `C:\tomcat9`.
+Tomcat en una ruta sin espacios ni tildes: `C:\tomcat9`
 
 ---
 
@@ -57,34 +56,44 @@ git clone https://github.com/Fercho0409/clinica-citas-dwf901.git
 cd clinica-citas-dwf901
 ```
 
-### 2. Crear la base de datos
+### 2. Crear y cargar la base de datos
 
-Desde el cliente de MySQL:
+La base se llama **`clinica`** y las tablas están en plural: `pacientes`, `medicos`,
+`especialidades`.
 
-```sql
-CREATE DATABASE clinica_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
+El script `clinicafinal.sql` crea la base, las tablas y carga datos de prueba
+(5 especialidades, 10 pacientes y 5 médicos).
 
-El `utf8mb4` es necesario para que tildes y ñ se guarden correctamente.
-
-Luego ejecutar el script de creación de tablas:
+**Importante — cómo importarlo sin dañar las tildes:**
 
 ```bash
-mysql -u root -p clinica_db < database/clinica_db.sql
+mysql -u root -p --default-character-set=utf8mb4 -e "source C:/ruta/completa/clinicafinal.sql"
 ```
 
-### 3. Configurar las credenciales
+Con **barras hacia adelante** en la ruta.
 
-Copiar el archivo de ejemplo y editarlo con los datos locales:
+Si se importa de otra forma desde PowerShell, los acentos se corrompen y los nombres
+aparecen como `Mart?nez` o `Mart├¡nez`. El archivo está bien; el problema es la
+codificación de la consola de Windows.
+
+Para verificar que quedó correcto:
+
+```sql
+SELECT HEX(nombres) FROM clinica.pacientes WHERE id_paciente = 3;
+```
+
+Debe devolver `4A6F73C3A9` (los bytes `C3A9` son la `é` en UTF-8).
+
+### 3. Configurar las credenciales
 
 ```bash
 copy src\main\resources\db.properties.example src\main\resources\db.properties
 ```
 
-Editar `db.properties` y colocar la contraseña de MySQL.
+Editar `db.properties` con la contraseña local de MySQL.
 
 > `db.properties` está en `.gitignore` y **no debe subirse al repositorio**.
-> Antes de cada `git push`, verificar con `git status` que no aparezca en la lista.
+> Antes de cada `git push`, verificar con `git status` que no aparezca.
 
 ### 4. Configurar el IDE
 
@@ -96,11 +105,9 @@ Editar `db.properties` y colocar la contraseña de MySQL.
 
 Clic derecho en el proyecto → **Clean and Build**, luego `F6`.
 
-La aplicación queda disponible en:
-`http://localhost:8080/clinica-citas/`
-
-Para verificar la conexión a la base de datos:
-`http://localhost:8080/clinica-citas/prueba-conexion`
+- Portada: `http://localhost:8080/clinica-citas/`
+- Pacientes: `http://localhost:8080/clinica-citas/pacientes`
+- Médicos: `http://localhost:8080/clinica-citas/medicos`
 
 ---
 
@@ -108,35 +115,63 @@ Para verificar la conexión a la base de datos:
 
 ```
 src/main/java/sv/edu/udb/clinica/
-├── modelo/         POJOs (Paciente, Medico, Especialidad)
-├── dao/            Acceso a datos con JDBC y PreparedStatement
-├── controlador/    Servlets
-└── util/           ConexionBD y utilidades
+├── modelo/         POJOs: Paciente, Medico, Especialidad
+├── dao/            PacienteDAO, MedicoDAO — JDBC con PreparedStatement
+├── controlador/    PacienteServlet, MedicoServlet
+└── util/           ConexionBD
 
 src/main/resources/
 ├── db.properties           Credenciales locales (NO versionado)
 └── db.properties.example   Plantilla de configuración
 
-src/main/webapp/    Vistas JSP y recursos estáticos
-database/           Script SQL de creación
+src/main/webapp/
+├── index.jsp
+└── views/
+    ├── pacientes/      listar, formulario, editar
+    ├── medicos/        listar, formulario, editar
+    ├── mensajes/       exito, error
+    └── partials/       navbar
+
+clinicafinal.sql    Script de creación y datos de prueba
+docs/               Product Backlog y documentación del proyecto
 ```
 
-La separación de capas es estricta:
+### Separación de responsabilidades
 
 - Las **JSP** solo muestran información. No acceden a datos.
 - Los **Servlets** reciben peticiones, validan y coordinan. No escriben SQL.
 - Los **DAO** son los únicos que ejecutan consultas, siempre con `PreparedStatement`.
 - Los **POJO** transportan datos entre capas. No contienen lógica.
 
+Los enlaces internos siempre usan `${pageContext.request.contextPath}` y apuntan al
+Servlet, nunca directamente a un archivo `.jsp`. Las vistas se invocan a través del
+controlador.
+
+---
+
+## Funcionalidad implementada
+
+**Pacientes** — listar, crear, editar, eliminar.
+**Médicos** — listar, crear, editar, eliminar, con selección de especialidad desde
+lista desplegable.
+
+**Validaciones**
+- Cliente: atributos `required` en los formularios.
+- Servidor: verificación de campos obligatorios antes de llamar al DAO.
+- Base de datos: restricción `UNIQUE` en el DUI, con mensaje claro al usuario cuando
+  se intenta duplicar.
+
+**Manejo de errores** — las excepciones `SQLException` se capturan en el controlador y
+se muestran en la vista `views/mensajes/error.jsp`.
+
 ---
 
 ## Convenciones de trabajo
 
-- La rama `main` se mantiene siempre estable. Nadie sube directo a ella.
-- Cada tarea se desarrolla en su propia rama: `feature/dao-paciente`, `feature/vista-medico`, etc.
+- La rama `main` se mantiene siempre estable.
+- Cada tarea se desarrolla en su propia rama: `feature/dao-paciente`, `feature/vista-medico`.
 - Los cambios entran a `main` mediante Pull Request.
-- Commits descriptivos en español, en imperativo:
-  `Agregar validación de DUI en PacienteServlet`
+- Commits descriptivos en español, en imperativo.
 - Cada integrante sube su propio trabajo. El historial de commits es parte de la evaluación.
 
 Antes del primer commit, configurar la identidad con el correo de la cuenta de GitHub:
@@ -155,29 +190,48 @@ Si el correo no coincide, los commits no se acreditan al autor.
 | Síntoma | Causa | Solución |
 |---------|-------|----------|
 | `Failed to delete ...\target\...` | El proyecto está en OneDrive | Mover a `C:\proyectos` |
-| `package javax.ws.rs does not exist` | Archivos sobrantes de la plantilla | Borrar `JakartaRestConfiguration.java` y la carpeta `resources/` de `sv/edu/udb/clinica` |
 | `Unable to load the mojo 'war'` | `maven-war-plugin` obsoleto | Ya corregido en el `pom.xml` (versión 3.4.0) |
+| `package javax.ws.rs does not exist` | Archivos de plantilla JAX-RS | Eliminar `JakartaRestConfiguration.java` y la carpeta `resources/` del paquete |
+| `unreported exception java.sql.SQLException` | El Servlet llama al DAO sin `try/catch` | Envolver la llamada en `try/catch` |
+| Nombres con `?` o caracteres raros | Script importado sin `--default-character-set=utf8mb4` | Reimportar con el comando de la sección 2 |
+| `Archivo JSP no encontrado` | Ruta del Servlet no coincide con el nombre del archivo | Verificar que `getRequestDispatcher` apunte al nombre real |
 | `Public Key Retrieval is not allowed` | Configuración de MySQL 8.4 | Ya incluido en la URL de `db.properties.example` |
 | 404 al abrir la aplicación | No está desplegada | Ejecutar con `F6` desde NetBeans |
 
 ---
 
-## Estado actual
+## Deuda técnica
+
+Pendientes conocidos, a resolver en la Fase 2:
+
+- En el modelo `Medico`, el atributo se llama `jvpm` pero la columna de la base es `dui`.
+  El DAO hace el mapeo y funciona, pero conviene unificar el nombre.
+- El `doGet` de `PacienteServlet` captura las excepciones e imprime en consola sin
+  informar al usuario. El `doPost` sí las maneja correctamente.
+- `PruebaConexionServlet` fue una herramienta de diagnóstico inicial y ya no es
+  necesaria; puede eliminarse.
+- Los formularios usan `formulario.jsp` tanto para crear como para editar; las vistas
+  `editar.jsp` quedaron sin uso.
+
+---
+
+## Estado
 
 **Fase 1 — Fundamentos Java Web y Arquitectura MVC**
-Entrega: 12 o 13 de septiembre de 2026 · 20% de la nota
+Entrega: septiembre de 2026 · 20% de la nota
 
 - [x] Configuración del proyecto y repositorio
-- [x] Conexión a MySQL con configuración externa
+- [x] Base de datos MySQL y script de creación
 - [x] POJOs del modelo
-- [ ] Script de base de datos
-- [ ] DAOs de paciente y médico
-- [ ] Servlets de paciente y médico
-- [ ] Vistas JSP con JSTL
-- [ ] Validaciones de cliente y servidor
-- [ ] PDF de evidencias y Product Backlog
+- [x] Conexión con configuración externa
+- [x] DAOs con consultas parametrizadas
+- [x] Servlets controladores
+- [x] Vistas JSP con JSTL
+- [x] CRUD completo de pacientes y médicos
+- [x] Validaciones de cliente y servidor
+- [ ] PDF de evidencias
 
-### Alcance de esta fase
+### Alcance
 
-Solo los módulos de **pacientes** y **médicos** con sus operaciones CRUD.
-El módulo de **citas** se implementa en la Fase 2, cuando se incorpore JPA.
+Esta fase cubre los módulos de **pacientes** y **médicos**.
+El módulo de **citas** corresponde a la Fase 2, cuando se incorpore JPA o Hibernate.
