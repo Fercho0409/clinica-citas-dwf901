@@ -3,9 +3,10 @@
 Proyecto de cátedra de **DWF901 — Desarrollo de Aplicaciones con Web Frameworks**
 Universidad Don Bosco · Ciclo II 2026
 
-Aplicación Java Web con arquitectura MVC para administrar pacientes y médicos de una clínica.
-Primer incremento (Fase 1) de un sistema que crecerá durante el ciclo hasta incluir citas,
-servicios REST y seguridad por roles.
+Aplicación Java Web para administrar pacientes, médicos y citas de una clínica.
+Se construye por incrementos a lo largo del ciclo: arquitectura MVC con JDBC en la
+Fase 1, persistencia con JPA e interfaz JSF en la Fase 2, servicios REST en la
+Fase 3 y seguridad por perfiles en la Fase 4.
 
 ---
 
@@ -30,9 +31,11 @@ servicios REST y seguridad por roles.
 | Apache Tomcat | **9.0.121** | Usa el paquete `javax.servlet` |
 | MySQL Server | 8.4.11 (LTS) | |
 | Maven | Incluido en NetBeans | |
+| Hibernate | 5.6.15.Final | Se descarga solo con Maven, no se instala aparte |
 
-> **El proyecto usa `javax.servlet`, no `jakarta.servlet`.**
-> Tomcat 10 o superior **no** ejecutará esta aplicación.
+> **El proyecto usa `javax.servlet` y `javax.persistence`, no `jakarta`.**
+> Tomcat 10 o superior **no** ejecutará esta aplicación, y Hibernate 6 tampoco es
+> compatible: usa el espacio de nombres `jakarta.persistence`.
 
 ---
 
@@ -45,6 +48,10 @@ La sincronización bloquea archivos mientras Maven compila y produce errores com
 Ubicación recomendada: `C:\proyectos\clinica-citas`
 Tomcat en una ruta sin espacios ni tildes: `C:\tomcat9`
 
+**Si tienes XAMPP instalado, apaga su MySQL antes de ejecutar el proyecto.**
+XAMPP trae su propio servidor MySQL que ocupa el mismo puerto 3306 y no contiene la
+base `clinica`. Ver la sección de solución de problemas.
+
 ---
 
 ## Instalación
@@ -56,7 +63,18 @@ git clone https://github.com/Fercho0409/clinica-citas-dwf901.git
 cd clinica-citas-dwf901
 ```
 
-### 2. Crear y cargar la base de datos
+### 2. Verificar que el MySQL correcto esté activo
+
+Antes de cargar la base, confirmar qué servidor está escuchando en el puerto 3306:
+
+```powershell
+Get-Process -Id (Get-NetTCPConnection -LocalPort 3306 -State Listen).OwningProcess | Select-Object ProcessName, Path
+```
+
+La ruta debe apuntar a `C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe`.
+Si apunta a una carpeta de XAMPP, seguir los pasos de la sección de problemas frecuentes.
+
+### 3. Crear y cargar la base de datos
 
 La base se llama **`clinica`** y las tablas están en plural: `pacientes`, `medicos`,
 `especialidades`.
@@ -73,8 +91,8 @@ mysql -u root -p --default-character-set=utf8mb4 -e "source C:/ruta/completa/cli
 Con **barras hacia adelante** en la ruta.
 
 Si se importa de otra forma desde PowerShell, los acentos se corrompen y los nombres
-aparecen como `Mart?nez` o `Mart├¡nez`. El archivo está bien; el problema es la
-codificación de la consola de Windows.
+aparecen como `Mart?nez`. El archivo está bien; el problema es la codificación de la
+consola de Windows.
 
 Para verificar que quedó correcto:
 
@@ -84,7 +102,7 @@ SELECT HEX(nombres) FROM clinica.pacientes WHERE id_paciente = 3;
 
 Debe devolver `4A6F73C3A9` (los bytes `C3A9` son la `é` en UTF-8).
 
-### 3. Configurar las credenciales
+### 4. Configurar las credenciales
 
 ```bash
 copy src\main\resources\db.properties.example src\main\resources\db.properties
@@ -95,19 +113,36 @@ Editar `db.properties` con la contraseña local de MySQL.
 > `db.properties` está en `.gitignore` y **no debe subirse al repositorio**.
 > Antes de cada `git push`, verificar con `git status` que no aparezca.
 
-### 4. Configurar el IDE
+Este archivo alimenta tanto la conexión JDBC de la Fase 1 como la configuración de
+JPA de la Fase 2. El `persistence.xml` no contiene credenciales.
+
+### 5. Configurar el IDE
 
 1. Registrar el JDK 21 en **Tools → Java Platforms → Add Platform**
 2. Registrar Tomcat 9 en la pestaña **Services** (usuario y contraseña: `admin` / `admin`)
 3. En **Properties → Build → Compile**, seleccionar **JDK 21** como Java Platform
 
-### 5. Ejecutar
+### 6. Ejecutar
 
 Clic derecho en el proyecto → **Clean and Build**, luego `F6`.
+
+La primera compilación tarda más de lo normal porque Maven descarga Hibernate y sus
+dependencias.
 
 - Portada: `http://localhost:8080/clinica-citas/`
 - Pacientes: `http://localhost:8080/clinica-citas/pacientes`
 - Médicos: `http://localhost:8080/clinica-citas/medicos`
+
+### 7. Verificar la configuración de JPA
+
+```
+http://localhost:8080/clinica-citas/prueba-jpa
+```
+
+Debe mostrar "Conexión correcta" y listar las cinco especialidades. En la ventana
+**Output → Apache Tomcat or TomEE** de NetBeans aparece el SQL que Hibernate genera.
+
+Esta página es temporal y se elimina al cerrar la Fase 2.
 
 ---
 
@@ -115,14 +150,19 @@ Clic derecho en el proyecto → **Clean and Build**, luego `F6`.
 
 ```
 src/main/java/sv/edu/udb/clinica/
-├── modelo/         POJOs: Paciente, Medico, Especialidad
-├── dao/            PacienteDAO, MedicoDAO — JDBC con PreparedStatement
+├── modelo/         Paciente, Medico, Especialidad
+│                   (en migración a entidades JPA)
+├── dao/            PacienteDAO, MedicoDAO
+│                   (JDBC con PreparedStatement, en migración a JPA)
 ├── controlador/    PacienteServlet, MedicoServlet
-└── util/           ConexionBD
+└── util/           ConexionBD    conexión JDBC (Fase 1)
+                    JPAUtil       fábrica de EntityManager (Fase 2)
 
 src/main/resources/
-├── db.properties           Credenciales locales (NO versionado)
-└── db.properties.example   Plantilla de configuración
+├── META-INF/
+│   └── persistence.xml      Unidad de persistencia (sin credenciales)
+├── db.properties            Credenciales locales (NO versionado)
+└── db.properties.example    Plantilla de configuración
 
 src/main/webapp/
 ├── index.jsp
@@ -138,14 +178,27 @@ docs/               Product Backlog y documentación del proyecto
 
 ### Separación de responsabilidades
 
-- Las **JSP** solo muestran información. No acceden a datos.
-- Los **Servlets** reciben peticiones, validan y coordinan. No escriben SQL.
-- Los **DAO** son los únicos que ejecutan consultas, siempre con `PreparedStatement`.
-- Los **POJO** transportan datos entre capas. No contienen lógica.
+- Las **vistas** solo muestran información. No acceden a datos.
+- Los **controladores** reciben peticiones, validan y coordinan. No escriben SQL.
+- La **capa de acceso a datos** es la única que consulta la base, con consultas
+  parametrizadas.
+- Los **objetos del modelo** transportan datos entre capas. No contienen lógica.
 
 Los enlaces internos siempre usan `${pageContext.request.contextPath}` y apuntan al
-Servlet, nunca directamente a un archivo `.jsp`. Las vistas se invocan a través del
-controlador.
+controlador, nunca directamente a un archivo `.jsp`. Las vistas se invocan a través
+del controlador.
+
+### Configuración de la persistencia
+
+Los datos de conexión no están escritos dentro del `persistence.xml`. La clase
+`JPAUtil` lee `db.properties` y se los entrega a JPA al construir la fábrica de
+`EntityManager`. Así las credenciales se mantienen fuera del control de versiones,
+igual que en la Fase 1.
+
+La unidad de persistencia usa `RESOURCE_LOCAL` porque Tomcat no administra
+transacciones, y `hibernate.hbm2ddl.auto=validate`, que verifica que las entidades
+coincidan con las tablas sin crear ni modificar nada. El esquema lo mantiene el
+script de la base.
 
 ---
 
@@ -157,7 +210,7 @@ lista desplegable.
 
 **Validaciones**
 - Cliente: atributos `required` en los formularios.
-- Servidor: verificación de campos obligatorios antes de llamar al DAO.
+- Servidor: verificación de campos obligatorios antes de llamar a la capa de datos.
 - Base de datos: restricción `UNIQUE` en el DUI, con mensaje claro al usuario cuando
   se intenta duplicar.
 
@@ -189,36 +242,73 @@ Si el correo no coincide, los commits no se acreditan al autor.
 
 | Síntoma | Causa | Solución |
 |---------|-------|----------|
+| `Access denied for user 'root'@'localhost'` | El MySQL de XAMPP ocupa el puerto 3306 | Ver la sección siguiente |
 | `Failed to delete ...\target\...` | El proyecto está en OneDrive | Mover a `C:\proyectos` |
 | `Unable to load the mojo 'war'` | `maven-war-plugin` obsoleto | Ya corregido en el `pom.xml` (versión 3.4.0) |
 | `package javax.ws.rs does not exist` | Archivos de plantilla JAX-RS | Eliminar `JakartaRestConfiguration.java` y la carpeta `resources/` del paquete |
 | `unreported exception java.sql.SQLException` | El Servlet llama al DAO sin `try/catch` | Envolver la llamada en `try/catch` |
-| Nombres con `?` o caracteres raros | Script importado sin `--default-character-set=utf8mb4` | Reimportar con el comando de la sección 2 |
-| `Archivo JSP no encontrado` | Ruta del Servlet no coincide con el nombre del archivo | Verificar que `getRequestDispatcher` apunte al nombre real |
+| Nombres con `?` o caracteres raros | Script importado sin `--default-character-set=utf8mb4` | Reimportar con el comando de la sección 3 |
+| `Archivo JSP no encontrado` | Ruta del controlador no coincide con el nombre del archivo | Verificar que `getRequestDispatcher` apunte al nombre real |
 | `Public Key Retrieval is not allowed` | Configuración de MySQL 8.4 | Ya incluido en la URL de `db.properties.example` |
 | 404 al abrir la aplicación | No está desplegada | Ejecutar con `F6` desde NetBeans |
+| `Unable to create requested service [JdbcEnvironment]` | Hibernate no logró conectar | El error real está al final del seguimiento, normalmente es la contraseña o el puerto |
+
+### Conflicto con XAMPP
+
+XAMPP incluye su propio servidor MySQL, que ocupa el puerto 3306 y no contiene la base
+`clinica`. Su usuario `root` no tiene contraseña, así que la aplicación recibe
+`Access denied for user 'root'@'localhost' (using password: YES)`.
+
+El proceso de XAMPP puede seguir activo aunque su panel de control lo muestre detenido.
+
+**1. Identificar qué proceso ocupa el puerto:**
+
+```powershell
+Get-Process -Id (Get-NetTCPConnection -LocalPort 3306 -State Listen).OwningProcess | Select-Object Id, ProcessName, Path
+```
+
+**2. Si la ruta apunta a XAMPP, detenerlo** desde su panel de control. Si el panel ya lo
+muestra apagado, terminar el proceso con el identificador que devolvió el comando anterior:
+
+```powershell
+Stop-Process -Id <ID> -Force
+```
+
+**3. Iniciar el servicio correcto**, en PowerShell **como administrador**:
+
+```powershell
+Start-Service MySQL84
+```
+
+**4. Confirmar** repitiendo el comando del paso 1. La ruta debe ser
+`C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe`.
+
+Para usar ambos servidores a la vez, cambiar el puerto del MySQL de XAMPP a 3307 en su
+archivo `my.ini`.
 
 ---
 
 ## Deuda técnica
 
-Pendientes conocidos, a resolver en la Fase 2:
+Pendientes conocidos. El detalle completo está en `docs/product-backlog.md`.
 
 - En el modelo `Medico`, el atributo se llama `jvpm` pero la columna de la base es `dui`.
-  El DAO hace el mapeo y funciona, pero conviene unificar el nombre.
+  Se unifica al convertir la clase en entidad JPA.
 - El `doGet` de `PacienteServlet` captura las excepciones e imprime en consola sin
   informar al usuario. El `doPost` sí las maneja correctamente.
-- `PruebaConexionServlet` fue una herramienta de diagnóstico inicial y ya no es
-  necesaria; puede eliminarse.
+- `PruebaConexionServlet` y `PruebaJPAServlet` son herramientas de diagnóstico y se
+  eliminan al cerrar la Fase 2.
 - Los formularios usan `formulario.jsp` tanto para crear como para editar; las vistas
   `editar.jsp` quedaron sin uso.
+- La contraseña de base de datos usada en desarrollo es débil y debe robustecerse antes
+  del despliegue de la Fase 4.
 
 ---
 
 ## Estado
 
-**Fase 1 — Fundamentos Java Web y Arquitectura MVC**
-Entrega: septiembre de 2026 · 20% de la nota
+**Fase 1 — Fundamentos Java Web y Arquitectura MVC** · Entregada
+Septiembre de 2026 · 20% de la nota
 
 - [x] Configuración del proyecto y repositorio
 - [x] Base de datos MySQL y script de creación
@@ -229,9 +319,24 @@ Entrega: septiembre de 2026 · 20% de la nota
 - [x] Vistas JSP con JSTL
 - [x] CRUD completo de pacientes y médicos
 - [x] Validaciones de cliente y servidor
+- [x] PDF de evidencias
+
+**Fase 2 — Persistencia Empresarial e Integración JSF** · En desarrollo
+Entrega: 10 u 11 de octubre de 2026 · 25% de la nota
+
+- [x] Configuración de Hibernate y la unidad de persistencia
+- [x] Lectura de credenciales externas al arrancar JPA
+- [ ] Entidades JPA con sus relaciones
+- [ ] Operaciones CRUD con JPA y transacciones
+- [ ] Tabla de citas y datos de prueba
+- [ ] Managed Beans
+- [ ] Vistas JSF sobre AdminLTE
+- [ ] Reglas de negocio del agendamiento
+- [ ] Validadores, convertidores y operaciones AJAX
 - [ ] PDF de evidencias
 
 ### Alcance
 
-Esta fase cubre los módulos de **pacientes** y **médicos**.
-El módulo de **citas** corresponde a la Fase 2, cuando se incorpore JPA o Hibernate.
+La Fase 1 cubrió los módulos de **pacientes** y **médicos** con JDBC.
+La Fase 2 incorpora el módulo de **citas**, migra la persistencia a JPA e implementa
+la interfaz con JSF sobre la plantilla AdminLTE, solicitada durante la defensa anterior.
