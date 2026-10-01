@@ -1,7 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
-    <!-- Define Persistence Unit -->
-    <persistence-unit name="my_persistence_unit">
-        
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+                                 http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+
+    <!-- Unidad de persistencia del proyecto.
+         RESOURCE_LOCAL porque Tomcat no administra transacciones;
+         las maneja la propia aplicacion.
+         Los datos de conexion NO van aqui: se leen de db.properties
+         al crear la fabrica de EntityManager (ver JPAUtil). -->
+    <persistence-unit name="clinicaPU" transaction-type="RESOURCE_LOCAL">
+
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+
+            <!-- validate: Hibernate revisa que las entidades coincidan con
+                 las tablas existentes, pero no crea ni modifica nada.
+                 El script de la base lo mantiene el equipo. -->
+            <property name="hibernate.hbm2ddl.auto" value="validate"/>
+
+            <!-- Muestra en consola el SQL que Hibernate genera.
+                 Util durante el desarrollo y para la defensa. -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+        </properties>
+
     </persistence-unit>
 </persistence>
