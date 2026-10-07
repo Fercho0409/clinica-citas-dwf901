@@ -1,25 +1,45 @@
 package sv.edu.udb.clinica.modelo;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+import javax.persistence.*;
 
-/**
- * POJO: representa una fila de la tabla paciente.
- */
-public class Paciente {
+@Entity
+@Table(name = "pacientes")
+public class Paciente implements Serializable {
 
-    private String direccion;
-    private int idPaciente;
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_paciente")
+    private Integer idPaciente;
+
+    @Column(name = "nombres", nullable = false, length = 100)
     private String nombres;
+
+    @Column(name = "apellidos", nullable = false, length = 100)
     private String apellidos;
+
+    @Column(name = "dui", nullable = false, unique = true, length = 10)
     private String dui;
+
+    @Column(name = "telefono", length = 20)
     private String telefono;
+
+    @Column(name = "correo", length = 100)
     private String correo;
+
+    @Column(name = "direccion", length = 255)
+    private String direccion;
+
+    @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
 
     public Paciente() {
     }
 
-    public Paciente(int idPaciente, String nombres, String apellidos, String dui,
+    public Paciente(Integer idPaciente, String nombres, String apellidos, String dui,
                     String telefono, String correo, LocalDate fechaNacimiento) {
         this.idPaciente = idPaciente;
         this.nombres = nombres;
@@ -30,11 +50,11 @@ public class Paciente {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    public int getIdPaciente() {
+    public Integer getIdPaciente() {
         return idPaciente;
     }
 
-    public void setIdPaciente(int idPaciente) {
+    public void setIdPaciente(Integer idPaciente) {
         this.idPaciente = idPaciente;
     }
 
@@ -86,17 +106,16 @@ public class Paciente {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    /** Metodo de conveniencia para mostrar el nombre completo en las vistas. */
-    public String getNombreCompleto() {
-        return nombres + " " + apellidos;
-    }
-
-        public String getDireccion() {
+    public String getDireccion() {
         return direccion;
     }
 
     public void setDireccion(String direccion) {
         this.direccion = direccion;
     }
-}
 
+    /** Método de conveniencia para mostrar el nombre completo en las vistas. */
+    public String getNombreCompleto() {
+        return nombres + " " + apellidos;
+    }
+}

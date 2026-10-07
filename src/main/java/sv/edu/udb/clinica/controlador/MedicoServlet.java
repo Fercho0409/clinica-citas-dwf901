@@ -1,7 +1,6 @@
 package sv.edu.udb.clinica.controlador;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -39,14 +38,13 @@ public class MedicoServlet extends HttpServlet {
                     request.getRequestDispatcher("/views/medicos/formulario.jsp").forward(request, response);
                     break;
 
-               case "editar":
+                case "editar":
                     int idEdit = Integer.parseInt(request.getParameter("id"));
                     Medico medicoAEditar = medicoDAO.buscarPorId(idEdit); 
                     request.setAttribute("medico", medicoAEditar);
                     request.setAttribute("listaEspecialidades", medicoDAO.listarEspecialidades());
                     request.getRequestDispatcher("/views/medicos/formulario.jsp").forward(request, response);
                     break;
-                    
 
                 case "eliminar":
                     int idEliminar = Integer.parseInt(request.getParameter("id"));
@@ -77,7 +75,8 @@ public class MedicoServlet extends HttpServlet {
         String telefono = request.getParameter("telefono");
         String correo = request.getParameter("correo");
         String idEspecialidadStr = request.getParameter("idEspecialidad");
-                if (nombres == null || nombres.trim().isEmpty()
+
+        if (nombres == null || nombres.trim().isEmpty()
                 || apellidos == null || apellidos.trim().isEmpty()
                 || jvpm == null || jvpm.trim().isEmpty()
                 || idEspecialidadStr == null || idEspecialidadStr.trim().isEmpty()) {
@@ -95,11 +94,12 @@ public class MedicoServlet extends HttpServlet {
 
         if (idEspecialidadStr != null && !idEspecialidadStr.isEmpty()) {
             Especialidad esp = new Especialidad();
-            esp.setIdEspecialidad(Integer.parseInt(idEspecialidadStr));
+            // Solución: Usar Long.parseLong para que coincida con el ID de Especialidad
+            esp.setIdEspecialidad(Long.parseLong(idEspecialidadStr));
             medico.setEspecialidad(esp);
         }
 
-              try {
+        try {
             if (idStr == null || idStr.trim().isEmpty()) {
                 medicoDAO.insertar(medico);
             } else {
@@ -108,7 +108,7 @@ public class MedicoServlet extends HttpServlet {
             }
             response.sendRedirect(request.getContextPath() + "/medicos?accion=listar");
 
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             String mensaje;
             if (ex.getMessage() != null && ex.getMessage().contains("Duplicate entry")) {
                 mensaje = "Ya existe un médico registrado con el DUI " + jvpm + ".";
@@ -118,6 +118,5 @@ public class MedicoServlet extends HttpServlet {
             request.setAttribute("mensaje", mensaje);
             request.getRequestDispatcher("/views/mensajes/error.jsp").forward(request, response);
         }
-
     }
 }

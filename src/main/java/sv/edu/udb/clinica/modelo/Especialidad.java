@@ -1,20 +1,9 @@
 package sv.edu.udb.clinica.modelo;
 
 import java.io.Serializable;
-import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import java.util.List;
+import javax.persistence.*;
 
-/**
- * Especialidad medica.
- *
- * Fase 2: convertida en entidad JPA. Las anotaciones indican
- * a que tabla y a que columnas corresponde cada atributo.
- */
 @Entity
 @Table(name = "especialidades")
 public class Especialidad implements Serializable {
@@ -24,7 +13,7 @@ public class Especialidad implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_especialidad")
-    private int idEspecialidad;
+    private Long idEspecialidad;
 
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
@@ -32,19 +21,17 @@ public class Especialidad implements Serializable {
     @Column(name = "descripcion", length = 255)
     private String descripcion;
 
+    @OneToMany(mappedBy = "especialidad", cascade = CascadeType.ALL)
+    private List<Medico> medicos;
+
     public Especialidad() {
     }
 
-    public Especialidad(String nombre, String descripcion) {
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-    }
-
-    public int getIdEspecialidad() {
+    public Long getIdEspecialidad() {
         return idEspecialidad;
     }
 
-    public void setIdEspecialidad(int idEspecialidad) {
+    public void setIdEspecialidad(Long idEspecialidad) {
         this.idEspecialidad = idEspecialidad;
     }
 
@@ -64,25 +51,11 @@ public class Especialidad implements Serializable {
         this.descripcion = descripcion;
     }
 
-    @Override
-    public boolean equals(Object objeto) {
-        if (this == objeto) {
-            return true;
-        }
-        if (!(objeto instanceof Especialidad)) {
-            return false;
-        }
-        Especialidad otra = (Especialidad) objeto;
-        return idEspecialidad == otra.idEspecialidad;
+    public List<Medico> getMedicos() {
+        return medicos;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(idEspecialidad);
-    }
-
-    @Override
-    public String toString() {
-        return nombre;
+    public void setMedicos(List<Medico> medicos) {
+        this.medicos = medicos;
     }
 }
