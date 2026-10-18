@@ -63,7 +63,7 @@
     margin-top: 3px !important;
 }
 
-/* ===== Fondo sólido para el desplegable del DatePicker / Calendario ===== */
+/* ===== Fondo sólido y opaco para el panel del DatePicker / Calendario ===== */
 .ui-datepicker-panel,
 .ui-datepicker,
 .ui-cc-panel {

@@ -22,7 +22,7 @@ public class EmailValidator implements Validator {
 
         String email = value.toString().trim().toLowerCase();
 
-        // 1. Validar patrón general mediante expresión regular
+        // 1. Validar sintaxis general
         if (!pattern.matcher(email).matches()) {
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                     "Error de validación",
@@ -30,7 +30,7 @@ public class EmailValidator implements Validator {
             throw new ValidatorException(msg);
         }
 
-        // 2. Bloquear servidores con nombres de una sola letra (ej: @h.com)
+        // 2. Rechazar proveedores de correo con una sola letra (ej: @h.com)
         String[] parts = email.split("@");
         if (parts.length == 2) {
             String domain = parts[1];

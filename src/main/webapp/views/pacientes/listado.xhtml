@@ -106,7 +106,7 @@
             </div>
         </div>
 
-        <!-- ===== Diálogo Crear/Editar con Validadores y maxdate ===== -->
+        <!-- ===== Diálogo Crear/Editar con DatePicker ===== -->
         <p:dialog header="Datos del Paciente"
                   widgetVar="dlgPaciente"
                   modal="true"
@@ -139,7 +139,6 @@
                                   pattern="dd/MM/yyyy"
                                   showButtonBar="true"
                                   required="true"
-                                  maxdate="today"
                                   styleClass="form-control">
                         <f:validator validatorId="fechaNacimientoValidator"/>
                     </p:datePicker>
