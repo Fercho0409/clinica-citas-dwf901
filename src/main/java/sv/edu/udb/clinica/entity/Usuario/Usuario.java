@@ -45,21 +45,45 @@ public class Usuario implements Serializable {
     public Usuario() {
     }
 
-    public Long getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; }
+    public Long getIdUsuario() { 
+        return idUsuario; 
+    }
+    public void setIdUsuario(Long idUsuario) { 
+        this.idUsuario = idUsuario; 
+    }
 
-    public String getNombreUsuario() { return nombreUsuario; }
-    public void setNombreUsuario(String nombreUsuario) { this.nombreUsuario = nombreUsuario; }
+    public String getNombreUsuario() { 
+        return nombreUsuario; 
+    }
+    public void setNombreUsuario(String nombreUsuario) { 
+        this.nombreUsuario = nombreUsuario; 
+    }
 
-    public String getClave() { return clave; }
-    public void setClave(String clave) { this.clave = clave; }
+    public String getClave() { 
+        return clave; 
+    }
+    public void setClave(String clave) { 
+        this.clave = clave; 
+    }
 
-    public String getNombreCompleto() { return nombreCompleto; }
-    public void setNombreCompleto(String nombreCompleto) { this.nombreCompleto = nombreCompleto; }
+    public String getNombreCompleto() { 
+        return nombreCompleto; 
+    }
+    public void setNombreCompleto(String nombreCompleto) { 
+        this.nombreCompleto = nombreCompleto; 
+    }
 
-    public String getRol() { return rol; }
-    public void setRol(String rol) { this.rol = rol; }
+    public String getRol() { 
+        return rol; 
+    }
+    public void setRol(String rol) { 
+        this.rol = rol; 
+    }
 
-    public Boolean getActivo() { return activo; }
-    public void setActivo(Boolean activo) { this.activo = activo; }
+    public Boolean getActivo() { 
+        return activo; 
+    }
+    public void setActivo(Boolean activo) { 
+        this.activo = activo; 
+    }
 }
