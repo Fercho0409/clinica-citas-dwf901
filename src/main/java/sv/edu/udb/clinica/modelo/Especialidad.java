@@ -1,9 +1,21 @@
 package sv.edu.udb.clinica.modelo;
 
 import java.io.Serializable;
-import java.util.List;
-import javax.persistence.*;
+import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
+/**
+ * Especialidad medica.
+ *
+ * El identificador es Integer porque la columna id_especialidad de la
+ * base es INT. Con Long, Hibernate esperaba BIGINT y la validacion del
+ * esquema fallaba al arrancar.
+ */
 @Entity
 @Table(name = "especialidades")
 public class Especialidad implements Serializable {
@@ -13,7 +25,7 @@ public class Especialidad implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_especialidad")
-    private Long idEspecialidad;
+    private Integer idEspecialidad;
 
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
@@ -21,17 +33,24 @@ public class Especialidad implements Serializable {
     @Column(name = "descripcion", length = 255)
     private String descripcion;
 
-    @OneToMany(mappedBy = "especialidad", cascade = CascadeType.ALL)
-    private List<Medico> medicos;
-
     public Especialidad() {
     }
 
-    public Long getIdEspecialidad() {
+    public Especialidad(Integer idEspecialidad, String nombre) {
+        this.idEspecialidad = idEspecialidad;
+        this.nombre = nombre;
+    }
+
+    public Especialidad(String nombre, String descripcion) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
+
+    public Integer getIdEspecialidad() {
         return idEspecialidad;
     }
 
-    public void setIdEspecialidad(Long idEspecialidad) {
+    public void setIdEspecialidad(Integer idEspecialidad) {
         this.idEspecialidad = idEspecialidad;
     }
 
@@ -51,11 +70,24 @@ public class Especialidad implements Serializable {
         this.descripcion = descripcion;
     }
 
-    public List<Medico> getMedicos() {
-        return medicos;
+    @Override
+    public boolean equals(Object objeto) {
+        if (this == objeto) {
+            return true;
+        }
+        if (!(objeto instanceof Especialidad)) {
+            return false;
+        }
+        return Objects.equals(idEspecialidad, ((Especialidad) objeto).idEspecialidad);
     }
 
-    public void setMedicos(List<Medico> medicos) {
-        this.medicos = medicos;
+    @Override
+    public int hashCode() {
+        return Objects.hash(idEspecialidad);
+    }
+
+    @Override
+    public String toString() {
+        return nombre;
     }
 }

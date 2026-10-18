@@ -71,14 +71,14 @@ public class MedicoServlet extends HttpServlet {
         String idStr = request.getParameter("idMedico");
         String nombres = request.getParameter("nombres");
         String apellidos = request.getParameter("apellidos");
-        String jvpm = request.getParameter("jvpm");
+        String dui = request.getParameter("dui");
         String telefono = request.getParameter("telefono");
         String correo = request.getParameter("correo");
         String idEspecialidadStr = request.getParameter("idEspecialidad");
 
         if (nombres == null || nombres.trim().isEmpty()
                 || apellidos == null || apellidos.trim().isEmpty()
-                || jvpm == null || jvpm.trim().isEmpty()
+                || dui == null || dui.trim().isEmpty()
                 || idEspecialidadStr == null || idEspecialidadStr.trim().isEmpty()) {
             request.setAttribute("mensaje", "Los nombres, apellidos, DUI y especialidad son obligatorios.");
             request.getRequestDispatcher("/views/mensajes/error.jsp").forward(request, response);
@@ -88,14 +88,14 @@ public class MedicoServlet extends HttpServlet {
         Medico medico = new Medico();
         medico.setNombres(nombres);
         medico.setApellidos(apellidos);
-        medico.setJvpm(jvpm);
+        medico.setDui(dui);
         medico.setTelefono(telefono);
         medico.setCorreo(correo);
 
         if (idEspecialidadStr != null && !idEspecialidadStr.isEmpty()) {
             Especialidad esp = new Especialidad();
             // Solución: Usar Long.parseLong para que coincida con el ID de Especialidad
-            esp.setIdEspecialidad(Long.parseLong(idEspecialidadStr));
+            esp.setIdEspecialidad(Integer.parseInt(idEspecialidadStr));
             medico.setEspecialidad(esp);
         }
 
@@ -111,7 +111,7 @@ public class MedicoServlet extends HttpServlet {
         } catch (Exception ex) {
             String mensaje;
             if (ex.getMessage() != null && ex.getMessage().contains("Duplicate entry")) {
-                mensaje = "Ya existe un médico registrado con el DUI " + jvpm + ".";
+                mensaje = "Ya existe un médico registrado con el DUI " + dui + ".";
             } else {
                 mensaje = "No se pudo guardar el médico: " + ex.getMessage();
             }

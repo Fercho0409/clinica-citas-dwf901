@@ -23,7 +23,7 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Apellido</th>
-                    <th>DUI / JVPM</th>
+                    <th>DUI</th>
                     <th>Especialidad</th>
                     <th>Email</th>
                     <th>Teléfono</th>
@@ -36,7 +36,7 @@
                         <td>${medico.idMedico}</td>
                         <td>${medico.nombres}</td>
                         <td>${medico.apellidos}</td>
-                        <td>${medico.jvpm}</td>
+                        <td>${medico.dui}</td>
                         <td>${medico.especialidad.nombre}</td>
                         <td>${medico.correo}</td>
                         <td>${medico.telefono}</td>

@@ -30,8 +30,8 @@
             </div>
 
             <div class="mb-3">
-                <label for="jvpm" class="form-label">DUI:</label>
-                <input type="text" class="form-control" id="jvpm" name="jvpm" value="${medico.jvpm}" required>
+                <label for="dui" class="form-label">DUI:</label>
+                <input type="text" class="form-control" id="dui" name="dui" value="${medico.dui}" required>
             </div>
 
                         <div class="mb-3">
