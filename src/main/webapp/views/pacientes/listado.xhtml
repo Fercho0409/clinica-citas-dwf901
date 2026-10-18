@@ -52,57 +52,56 @@
                                              styleClass="btn btn-secondary"/>
                         </div>
                     </div>
-                
 
-                <!-- ===== Tabla ===== -->
-                <p:dataTable id="tablaPacientes"
-                             var="pac"
-                             value="#{pacienteBean.pacientesFiltrados}"
-                             styleClass="table table-striped table-hover"
-                             emptyMessage="No hay pacientes registrados"
-                             rows="10"
-                             paginator="true"
-                             paginatorPosition="bottom"
-                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
-                             rowsPerPageTemplate="5,10,25,50"
-                             currentPageReportTemplate="Mostrando {startRecord} a {endRecord} de {totalRecords}">
+                    <!-- ===== Tabla ===== -->
+                    <p:dataTable id="tablaPacientes"
+                                 var="pac"
+                                 value="#{pacienteBean.pacientesFiltrados}"
+                                 styleClass="table table-striped table-hover"
+                                 emptyMessage="No hay pacientes registrados"
+                                 rows="10"
+                                 paginator="true"
+                                 paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 rowsPerPageTemplate="5,10,25,50"
+                                 currentPageReportTemplate="Mostrando {startRecord} a {endRecord} de {totalRecords}">
 
-                    <p:column headerText="ID" style="width:60px">
-                        <h:outputText value="#{pac.idPaciente}"/>
-                    </p:column>
-                    <p:column headerText="Nombres">
-                        <h:outputText value="#{pac.nombres}"/>
-                    </p:column>
-                    <p:column headerText="Apellidos">
-                        <h:outputText value="#{pac.apellidos}"/>
-                    </p:column>
-                    <p:column headerText="DUI">
-                        <h:outputText value="#{pac.dui}"/>
-                    </p:column>
-                    <p:column headerText="Nacimiento">
-                        <h:outputText value="#{pac.fechaNacimientoTexto}"/>
-                    </p:column>
-                    <p:column headerText="Teléfono">
-                        <h:outputText value="#{pac.telefono}"/>
-                    </p:column>
-                    <p:column headerText="Correo">
-                        <h:outputText value="#{pac.correo}"/>
-                    </p:column>
-                    <p:column headerText="Acciones" styleClass="text-center" style="width:130px">
-                        <p:commandButton icon="fas fa-edit"
-                                         title="Editar"
-                                         actionListener="#{pacienteBean.editar(pac)}"
-                                         oncomplete="PF('dlgPaciente').show()"
-                                         update=":formPaciente"
-                                         styleClass="btn btn-warning btn-sm mr-1"/>
-                        <p:commandButton icon="fas fa-trash"
-                                         title="Eliminar"
-                                         actionListener="#{pacienteBean.eliminar(pac)}"
-                                         update="growlPac tablaPacientes formFiltroPac"
-                                         styleClass="btn btn-danger btn-sm"
-                                         onclick="return confirm('¿Eliminar este paciente?');"/>
-                    </p:column>
-                </p:dataTable>
+                        <p:column headerText="ID" style="width:60px">
+                            <h:outputText value="#{pac.idPaciente}"/>
+                        </p:column>
+                        <p:column headerText="Nombres">
+                            <h:outputText value="#{pac.nombres}"/>
+                        </p:column>
+                        <p:column headerText="Apellidos">
+                            <h:outputText value="#{pac.apellidos}"/>
+                        </p:column>
+                        <p:column headerText="DUI">
+                            <h:outputText value="#{pac.dui}"/>
+                        </p:column>
+                        <p:column headerText="Nacimiento">
+                            <h:outputText value="#{pac.fechaNacimientoTexto}"/>
+                        </p:column>
+                        <p:column headerText="Teléfono">
+                            <h:outputText value="#{pac.telefono}"/>
+                        </p:column>
+                        <p:column headerText="Correo">
+                            <h:outputText value="#{pac.correo}"/>
+                        </p:column>
+                        <p:column headerText="Acciones" styleClass="text-center" style="width:130px">
+                            <p:commandButton icon="fas fa-edit"
+                                             title="Editar"
+                                             actionListener="#{pacienteBean.editar(pac)}"
+                                             oncomplete="PF('dlgPaciente').show()"
+                                             update=":formPaciente"
+                                             styleClass="btn btn-warning btn-sm mr-1"/>
+                            <p:commandButton icon="fas fa-trash"
+                                             title="Eliminar"
+                                             actionListener="#{pacienteBean.eliminar(pac)}"
+                                             update=":growlPac tablaPacientes"
+                                             styleClass="btn btn-danger btn-sm"
+                                             onclick="return confirm('¿Eliminar este paciente?');"/>
+                        </p:column>
+                    </p:dataTable>
                 </h:form>
             </div>
         </div>
@@ -135,7 +134,7 @@
                     <p:datePicker id="pfecha"
                                   value="#{pacienteBean.paciente.fechaNacimiento}"
                                   pattern="dd/MM/yyyy"
-                                  showButtonPanel="true"
+                                  showButtonBar="true"
                                   required="true"
                                   styleClass="form-control"/>
 
@@ -157,7 +156,7 @@
                     <p:commandButton value="Guardar"
                                      icon="fas fa-save"
                                      actionListener="#{pacienteBean.guardar}"
-                                     update="growlPac tablaPacientes formFiltroPac @form"
+                                     update=":growlPac :formFiltroPac:tablaPacientes :formFiltroPac @form"
                                      oncomplete="if (!args.validationFailed) PF('dlgPaciente').hide();"
                                      styleClass="btn btn-primary"/>
                     <p:commandButton value="Cancelar"

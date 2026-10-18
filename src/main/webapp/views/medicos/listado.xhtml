@@ -13,10 +13,9 @@
 
     <ui:define name="contenido">
 
-        <!-- Mensajes globales -->
-        <p:growl id="growl" showDetail="true" life="4000"/>
+        <p:growl id="growlMed" showDetail="true" life="4000"/>
 
-        <div class="card card-primary card-outline">
+        <div class="card card-success card-outline">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-user-md mr-2"/>Listado de Médicos</h3>
                 <div class="card-tools">
@@ -26,7 +25,7 @@
                                          actionListener="#{medicoBean.nuevo}"
                                          oncomplete="PF('dlgMedico').show()"
                                          update=":formMedico"
-                                         styleClass="btn btn-primary btn-sm"/>
+                                         styleClass="btn btn-success btn-sm"/>
                     </h:form>
                 </div>
             </div>
@@ -34,91 +33,72 @@
             <div class="card-body">
 
                 <!-- ===== Filtros ===== -->
-                <h:form id="formFiltro">
+                <h:form id="formFiltroMed">
                     <div class="row mb-3">
-                        <div class="col-md-5">
+                        <div class="col-md-6">
                             <p:inputText value="#{medicoBean.filtroTexto}"
-                                         placeholder="Buscar por nombre, apellido o DUI..."
+                                         placeholder="Buscar por nombre, apellido..."
                                          styleClass="form-control">
                                 <p:ajax event="keyup" delay="400"
                                         listener="#{medicoBean.filtrar}"
                                         update="tablaMedicos"/>
                             </p:inputText>
                         </div>
-                        <div class="col-md-4">
-                            <p:selectOneMenu value="#{medicoBean.filtroEspecialidad}"
-                                             styleClass="form-control">
-                                <f:selectItem itemLabel="-- Todas las especialidades --" itemValue="#{null}"/>
-                                <f:selectItems value="#{medicoBean.especialidades}"
-                                               var="e"
-                                               itemValue="#{e.idEspecialidad}"
-                                               itemLabel="#{e.nombre}"/>
-                                <p:ajax event="change"
-                                        listener="#{medicoBean.filtrar}"
-                                        update="tablaMedicos"/>
-                            </p:selectOneMenu>
-                        </div>
                         <div class="col-md-3">
                             <p:commandButton value="Limpiar"
                                              icon="fas fa-eraser"
                                              actionListener="#{medicoBean.limpiarFiltros}"
-                                             update="formFiltro tablaMedicos"
+                                             update="formFiltroMed tablaMedicos"
                                              styleClass="btn btn-secondary"/>
                         </div>
                     </div>
-                
 
-                <!-- ===== Tabla ===== -->
-                <p:dataTable id="tablaMedicos"
-                             var="med"
-                             value="#{medicoBean.medicosFiltrados}"
-                             styleClass="table table-striped table-hover"
-                             emptyMessage="No hay médicos registrados"
-                             rows="10"
-                             paginator="true"
-                             paginatorPosition="bottom"
-                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
-                             rowsPerPageTemplate="5,10,25,50"
-                             currentPageReportTemplate="Mostrando {startRecord} a {endRecord} de {totalRecords}">
+                    <!-- ===== Tabla ===== -->
+                    <p:dataTable id="tablaMedicos"
+                                 var="med"
+                                 value="#{medicoBean.medicosFiltrados}"
+                                 styleClass="table table-striped table-hover"
+                                 emptyMessage="No hay médicos registrados"
+                                 rows="10"
+                                 paginator="true"
+                                 paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 rowsPerPageTemplate="5,10,25,50"
+                                 currentPageReportTemplate="Mostrando {startRecord} a {endRecord} de {totalRecords}">
 
-                    <p:column headerText="ID" style="width:60px">
-                        <h:outputText value="#{med.idMedico}"/>
-                    </p:column>
-                    <p:column headerText="Nombres">
-                        <h:outputText value="#{med.nombres}"/>
-                    </p:column>
-                    <p:column headerText="Apellidos">
-                        <h:outputText value="#{med.apellidos}"/>
-                    </p:column>
-                    <p:column headerText="DUI">
-                        <h:outputText value="#{med.dui}"/>
-                    </p:column>
-                    <p:column headerText="Especialidad">
-                        <span class="badge badge-info">
+                        <p:column headerText="ID" style="width:60px">
+                            <h:outputText value="#{med.idMedico}"/>
+                        </p:column>
+                        <p:column headerText="Nombres">
+                            <h:outputText value="#{med.nombres}"/>
+                        </p:column>
+                        <p:column headerText="Apellidos">
+                            <h:outputText value="#{med.apellidos}"/>
+                        </p:column>
+                        <p:column headerText="Especialidad">
                             <h:outputText value="#{med.especialidad.nombre}"/>
-                        </span>
-                    </p:column>
-                    <p:column headerText="Teléfono">
-                        <h:outputText value="#{med.telefono}"/>
-                    </p:column>
-                    <p:column headerText="Correo">
-                        <h:outputText value="#{med.correo}"/>
-                    </p:column>
-                    <p:column headerText="Acciones" styleClass="text-center" style="width:130px">
-                        <p:commandButton icon="fas fa-edit"
-                                         title="Editar"
-                                         actionListener="#{medicoBean.editar(med)}"
-                                         oncomplete="PF('dlgMedico').show()"
-                                         update=":formMedico"
-                                         styleClass="btn btn-warning btn-sm mr-1"/>
-                        <p:commandButton icon="fas fa-trash"
-                                         title="Eliminar"
-                                         actionListener="#{medicoBean.eliminar(med)}"
-                                         update="growl tablaMedicos formFiltro"
-                                         styleClass="btn btn-danger btn-sm"
-                                         onclick="return confirm('¿Eliminar este médico?');"/>
-                    </p:column>
-                </p:dataTable>
+                        </p:column>
+                        <p:column headerText="Teléfono">
+                            <h:outputText value="#{med.telefono}"/>
+                        </p:column>
+                        <p:column headerText="Correo">
+                            <h:outputText value="#{med.correo}"/>
+                        </p:column>
+                        <p:column headerText="Acciones" styleClass="text-center" style="width:130px">
+                            <p:commandButton icon="fas fa-edit"
+                                             title="Editar"
+                                             actionListener="#{medicoBean.editar(med)}"
+                                             oncomplete="PF('dlgMedico').show()"
+                                             update=":formMedico"
+                                             styleClass="btn btn-warning btn-sm mr-1"/>
+                            <p:commandButton icon="fas fa-trash"
+                                             title="Eliminar"
+                                             actionListener="#{medicoBean.eliminar(med)}"
+                                             update=":growlMed tablaMedicos"
+                                             styleClass="btn btn-danger btn-sm"
+                                             onclick="return confirm('¿Eliminar este médico?');"/>
+                        </p:column>
+                    </p:dataTable>
                 </h:form>
             </div>
         </div>
@@ -134,46 +114,39 @@
                   hideEffect="fade">
             <h:form id="formMedico">
                 <p:panelGrid columns="2" layout="grid" styleClass="w-100" columnClasses="col-4,col-8">
-                    <p:outputLabel for="nombres" value="Nombres:"/>
-                    <p:inputText id="nombres" value="#{medicoBean.medico.nombres}"
+                    <p:outputLabel for="mnombres" value="Nombres:"/>
+                    <p:inputText id="mnombres" value="#{medicoBean.medico.nombres}"
                                  required="true" styleClass="form-control"/>
 
-                    <p:outputLabel for="apellidos" value="Apellidos:"/>
-                    <p:inputText id="apellidos" value="#{medicoBean.medico.apellidos}"
+                    <p:outputLabel for="mapellidos" value="Apellidos:"/>
+                    <p:inputText id="mapellidos" value="#{medicoBean.medico.apellidos}"
                                  required="true" styleClass="form-control"/>
 
-                    <p:outputLabel for="dui" value="DUI:"/>
-                    <p:inputText id="dui" value="#{medicoBean.medico.dui}"
-                                 required="true" styleClass="form-control"
-                                 placeholder="00000000-0"/>
-
-                    <p:outputLabel for="telefono" value="Teléfono:"/>
-                    <p:inputText id="telefono" value="#{medicoBean.medico.telefono}"
-                                 styleClass="form-control"/>
-
-                    <p:outputLabel for="correo" value="Correo:"/>
-                    <p:inputText id="correo" value="#{medicoBean.medico.correo}"
-                                 styleClass="form-control"/>
-
-                    <p:outputLabel for="esp" value="Especialidad:"/>
-                    <p:selectOneMenu id="esp"
+                    <p:outputLabel for="mespecialidad" value="Especialidad:"/>
+                    <p:selectOneMenu id="mespecialidad"
                                      value="#{medicoBean.idEspecialidadSeleccionada}"
                                      required="true" styleClass="form-control">
-                        <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}"/>
+                        <f:selectItem itemLabel="Seleccione..." itemValue=""/>
                         <f:selectItems value="#{medicoBean.especialidades}"
-                                       var="e"
-                                       itemValue="#{e.idEspecialidad}"
-                                       itemLabel="#{e.nombre}"/>
+                                       var="esp" itemLabel="#{esp.nombre}" itemValue="#{esp.idEspecialidad}"/>
                     </p:selectOneMenu>
+
+                    <p:outputLabel for="mtelefono" value="Teléfono:"/>
+                    <p:inputText id="mtelefono" value="#{medicoBean.medico.telefono}"
+                                 styleClass="form-control"/>
+
+                    <p:outputLabel for="mcorreo" value="Correo:"/>
+                    <p:inputText id="mcorreo" value="#{medicoBean.medico.correo}"
+                                 styleClass="form-control"/>
                 </p:panelGrid>
 
                 <div class="text-right mt-3">
                     <p:commandButton value="Guardar"
                                      icon="fas fa-save"
                                      actionListener="#{medicoBean.guardar}"
-                                     update="growl tablaMedicos formFiltro @form"
-                                     oncomplete="if (!args || !args.validationFailed) PF('dlgMedico').hide();"
-                                     styleClass="btn btn-primary"/>
+                                     update=":growlMed :formFiltroMed:tablaMedicos :formFiltroMed @form"
+                                     oncomplete="if (!args.validationFailed) PF('dlgMedico').hide();"
+                                     styleClass="btn btn-success"/>
                     <p:commandButton value="Cancelar"
                                      icon="fas fa-times"
                                      type="button"
