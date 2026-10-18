@@ -149,10 +149,6 @@ public class CitaBean implements Serializable {
 
     /**
      * Guarda la cita despues de aplicar las reglas de negocio.
-     *
-     * Las validaciones se ejecutan aqui, en el servidor, y no solo en el
-     * navegador: una peticion enviada directamente se saltaria el
-     * required de los campos.
      */
     public void guardar() {
 
@@ -179,8 +175,7 @@ public class CitaBean implements Serializable {
             return;
         }
 
-        // Regla HU-12: el medico no puede tener dos citas vigentes
-        // a la misma hora
+        // Regla HU-12: el medico no puede tener dos citas vigentes a la misma hora
         if (citaDAO.medicoOcupado(idMedicoSeleccionado, cita.getFecha(),
                 hora, cita.getIdCita())) {
             error("Ese medico ya tiene una cita agendada el "
@@ -305,7 +300,11 @@ public class CitaBean implements Serializable {
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, "Atencion", mensaje));
     }
 
-    // ==================== Accesores ====================
+    // ==================== Accesores y Getters requeridos por la vista ====================
+
+    public EstadoCita[] getEstadosCita() {
+        return EstadoCita.values();
+    }
 
     public List<Cita> getCitas() {
         return citas;

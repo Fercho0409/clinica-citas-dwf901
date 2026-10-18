@@ -93,3 +93,22 @@
     background-color: #007bff !important;
     color: #ffffff !important;
 }
+/* ===== Corrección definitiva para paneles desplegables de PrimeFaces ===== */
+.ui-selectonemenu-panel,
+.ui-selectonemenu-panel .ui-selectonemenu-items-wrapper {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    opacity: 1 !important;
+    z-index: 100000 !important;
+}
+
+.ui-selectonemenu-panel .ui-selectonemenu-item {
+    background-color: transparent !important;
+    color: #333333 !important;
+    opacity: 1 !important;
+}
+
+.ui-selectonemenu-panel .ui-selectonemenu-item:hover {
+    background-color: #f4f6f9 !important;
+    color: #000000 !important;
+}

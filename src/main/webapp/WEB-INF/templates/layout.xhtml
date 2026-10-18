@@ -1,122 +1,110 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:p="http://primefaces.org/ui">
+
 <h:head>
-    <meta charset="UTF-8"/>
+    <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title><ui:insert name="titulo">Clínica</ui:insert></title>
+    <title><ui:insert name="titulo">Clínica UDB</ui:insert></title>
 
-    <!-- AdminLTE 3.2 + Font Awesome + Google Fonts (CDN) -->
+    <!-- AdminLTE CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700"/>
-    <h:outputStylesheet library="css" name="custom.css"/>
-
-    <!-- Reglas para forzar fondo sólido y evitar transparencia en diálogos PrimeFaces -->
-    <style>
-        .ui-dialog {
-            background-color: #ffffff !important;
-            background: #ffffff !important;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3) !important;
-        }
-
-        .ui-dialog .ui-dialog-content {
-            background-color: #ffffff !important;
-            background: #ffffff !important;
-        }
-
-        .ui-dialog .ui-dialog-titlebar {
-            background-color: #f4f6f9 !important;
-            background: #f4f6f9 !important;
-            color: #333333 !important;
-        }
-
-        .ui-widget-overlay {
-            background-color: rgba(0, 0, 0, 0.5) !important;
-            opacity: 0.5 !important;
-        }
-    </style>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+    <!-- CSS Personalizado para modales, growls y calendarios opacos -->
+    <h:outputStylesheet name="css/custom.css"/>
 </h:head>
-<body class="hold-transition sidebar-mini layout-fixed">
-<div class="wrapper">
 
-    <!-- ===== Navbar ===== -->
-    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" data-widget="pushmenu" href="#" role="button">
-                    <i class="fas fa-bars"></i>
-                </a>
-            </li>
-            <li class="nav-item d-none d-sm-inline-block">
-                <a href="#{request.contextPath}/index.xhtml" class="nav-link">Inicio</a>
-            </li>
-        </ul>
-    </nav>
+<h:body class="hold-transition sidebar-mini">
+    <div class="wrapper">
 
-    <!-- ===== Sidebar ===== -->
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <a href="#{request.contextPath}/index.xhtml" class="brand-link">
-            <i class="fas fa-hospital ms-3 me-2"></i>
-            <span class="brand-text font-weight-light">Clínica UDB</span>
-        </a>
-        <div class="sidebar">
-            <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview">
-                    <li class="nav-item">
-                        <a href="#{request.contextPath}/index.xhtml" class="nav-link">
-                            <i class="nav-icon fas fa-home"></i><p>Inicio</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#{request.contextPath}/views/pacientes/listado.xhtml" class="nav-link">
-                            <i class="nav-icon fas fa-users"></i><p>Pacientes</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#{request.contextPath}/views/medicos/listado.xhtml" class="nav-link">
-                            <i class="nav-icon fas fa-user-md"></i><p>Médicos</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#{request.contextPath}/views/citas/listado.xhtml" class="nav-link">
-                            <i class="nav-icon fas fa-calendar-check"></i><p>Citas</p>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </aside>
+        <!-- Navbar Superior con Información de Usuario y Botón Cerrar Sesión -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+            </ul>
 
-    <!-- ===== Contenido ===== -->
-    <div class="content-wrapper">
-        <section class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
-                        <h1><ui:insert name="tituloPagina">Página</ui:insert></h1>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item d-flex align-items-center mr-3">
+                    <span class="text-secondary font-weight-bold mr-2">
+                        <i class="fas fa-user-circle mr-1"/>#{loginBean.usuarioLogueado.nombreCompleto}
+                    </span>
+                    <span class="badge badge-info">#{loginBean.usuarioLogueado.rol}</span>
+                </li>
+                <li class="nav-item">
+                    <h:form>
+                        <p:commandButton value="Cerrar Sesión" 
+                                         icon="fas fa-sign-out-alt" 
+                                         action="#{loginBean.cerrarSesion}" 
+                                         styleClass="btn btn-outline-danger btn-sm"/>
+                    </h:form>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <a href="#" class="brand-link text-center">
+                <span class="brand-text font-weight-light"><b>Clínica</b> UDB</span>
+            </a>
+
+            <div class="sidebar">
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        <li class="nav-item">
+                            <h:link outcome="/views/pacientes/listado.xhtml" styleClass="nav-link">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>Pacientes</p>
+                            </h:link>
+                        </li>
+                        <li class="nav-item">
+                            <h:link outcome="/views/medicos/listado.xhtml" styleClass="nav-link">
+                                <i class="nav-icon fas fa-user-md"></i>
+                                <p>Médicos</p>
+                            </h:link>
+                        </li>
+                        <li class="nav-item">
+                            <h:link outcome="/views/citas/listado.xhtml" styleClass="nav-link">
+                                <i class="nav-icon fas fa-calendar-check"></i>
+                                <p>Citas</p>
+                            </h:link>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1><ui:insert name="tituloPagina">Panel de Control</ui:insert></h1>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
-        <section class="content">
-            <div class="container-fluid">
-                <ui:insert name="contenido"/>
-            </div>
-        </section>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+                    <ui:insert name="contenido"/>
+                </div>
+            </section>
+        </div>
+
+        <footer class="main-footer text-center">
+            <strong>Sistema de Gestión - Clínica UDB 2026</strong>
+        </footer>
+
     </div>
 
-    <!-- ===== Footer ===== -->
-    <footer class="main-footer">
-        <div class="float-right d-none d-sm-inline">DWF901 - Fase 2</div>
-        <strong>Universidad Don Bosco &#169; 2026</strong>
-    </footer>
-</div>
-
-<!-- Scripts de AdminLTE (jQuery + Bootstrap 4 + AdminLTE) -->
-<h:outputScript library="js" name="adminlte-setup.js" target="body"/>
-</body>
+    <!-- AdminLTE y Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+</h:body>
 </html>

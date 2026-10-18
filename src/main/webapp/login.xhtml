@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Login - Clínica UDB</title>
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/adminlte.min.css" />
+    </h:head>
+    <h:body styleClass="hold-transition login-page" style="background-color: #e9ecef; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+        <div class="login-box" style="width: 360px;">
+            <div class="card card-outline card-primary shadow">
+                <div class="card-header text-center">
+                    <h2 class="h1" style="font-weight: bold; color: #007bff;">Clínica UDB</h2>
+                </div>
+                <div class="card-body login-card-body">
+                    <p class="login-box-msg" style="margin-bottom: 15px; color: #6c757d; text-align: center;">Ingrese sus credenciales para acceder</p>
+                    
+                    <h:form id="loginForm">
+                        <p:messages id="messages" showDetail="true" closable="true" />
+
+                        <div class="input-group mb-3" style="margin-bottom: 15px;">
+                            <p:inputText id="usuario" value="#{loginBean.usuario}" 
+                                         placeholder="Usuario" required="true" requiredMessage="El usuario es obligatorio"
+                                         style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;" />
+                        </div>
+
+                        <div class="input-group mb-3" style="margin-bottom: 20px;">
+                            <p:password id="clave" value="#{loginBean.clave}" 
+                                        placeholder="Contraseña" required="true" requiredMessage="La contraseña es obligatoria"
+                                        style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <p:commandButton value="Iniciar Sesión" 
+                                                 action="#{loginBean.iniciarSesion}" 
+                                                 ajax="false"
+                                                 update="messages" 
+                                                 style="width: 100%; background-color: #007bff; border: none; color: white; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;" />
+                            </div>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+    </h:body>
+</html>

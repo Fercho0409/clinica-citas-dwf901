@@ -18,13 +18,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-/**
- * Cita medica: relaciona a un paciente con un medico en una fecha y hora.
- *
- * Es la entidad central de la Fase 2. Las relaciones hacia Paciente y
- * Medico se declaran con ManyToOne porque un paciente puede tener muchas
- * citas y un medico tambien.
- */
 @Entity
 @Table(name = "citas")
 public class Cita implements Serializable {
@@ -41,11 +34,6 @@ public class Cita implements Serializable {
     @Column(name = "id_cita")
     private Integer idCita;
 
-    /**
-     * EAGER porque el nombre del paciente se muestra en cada fila del
-     * listado. Con LAZY habria que mantener abierto el EntityManager
-     * hasta que la vista termine de dibujarse.
-     */
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_paciente", nullable = false)
     private Paciente paciente;
@@ -60,11 +48,6 @@ public class Cita implements Serializable {
     @Column(name = "hora", nullable = false)
     private LocalTime hora;
 
-    /**
-     * EnumType.STRING guarda el nombre del estado y no su posicion.
-     * Con ORDINAL, agregar un estado nuevo en medio de la lista
-     * cambiaria el significado de los registros ya guardados.
-     */
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 20)
     private EstadoCita estado = EstadoCita.PROGRAMADA;
@@ -72,11 +55,6 @@ public class Cita implements Serializable {
     @Column(name = "motivo", length = 255)
     private String motivo;
 
-    /**
-     * La base lo asigna sola con CURRENT_TIMESTAMP. Se marca como no
-     * insertable ni actualizable: si JPA lo incluyera en el INSERT
-     * enviaria un valor vacio a una columna que no lo admite.
-     */
     @Column(name = "fecha_registro", insertable = false, updatable = false)
     private LocalDateTime fechaRegistro;
 
@@ -153,17 +131,14 @@ public class Cita implements Serializable {
         return fechaRegistro;
     }
 
-    /** Fecha lista para mostrar en la vista, sin convertidores. */
     public String getFechaTexto() {
         return fecha != null ? fecha.format(FORMATO_FECHA) : "";
     }
 
-    /** Hora lista para mostrar en la vista. */
     public String getHoraTexto() {
         return hora != null ? hora.format(FORMATO_HORA) : "";
     }
 
-    /** Fecha y hora juntas, para comparar la cita con el momento actual. */
     public LocalDateTime getFechaHora() {
         if (fecha == null || hora == null) {
             return null;
@@ -171,13 +146,11 @@ public class Cita implements Serializable {
         return LocalDateTime.of(fecha, hora);
     }
 
-    /** Indica si la cita ya paso. */
     public boolean isPasada() {
         LocalDateTime momento = getFechaHora();
         return momento != null && momento.isBefore(LocalDateTime.now());
     }
 
-    /** Solo se puede cancelar o reprogramar una cita vigente. */
     public boolean isModificable() {
         return estado != null && estado.ocupaHorario() && !isPasada();
     }
