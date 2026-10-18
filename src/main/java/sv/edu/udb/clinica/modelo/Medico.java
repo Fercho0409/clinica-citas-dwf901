@@ -1,64 +1,100 @@
 package sv.edu.udb.clinica.modelo;
 
-/**
- * POJO: representa una fila de la tabla medico.
- * Contiene el objeto Especialidad completo, no solo el id,
- * para que las vistas puedan mostrar el nombre sin consultar de nuevo.
- */
-public class Medico {
+import java.io.Serializable;
+import javax.persistence.*;
 
-    private int idMedico;
-    private String nombres;
-    private String apellidos;
-    private String jvpm;
+@Entity
+@Table(name = "medicos")
+public class Medico implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_medico")
+    private Long idMedico;
+
+    @Column(name = "nombre", nullable = false, length = 100)
+    private String nombre;
+
+    @Column(name = "apellido", nullable = false, length = 100)
+    private String apellido;
+
+    @Column(name = "dui", nullable = false, unique = true, length = 10)
+    private String dui;
+
+    @Column(name = "telefono", length = 20)
     private String telefono;
+
+    @Column(name = "correo", length = 100)
     private String correo;
+
+    @ManyToOne
+    @JoinColumn(name = "id_especialidad", nullable = false)
     private Especialidad especialidad;
 
     public Medico() {
     }
 
-    public Medico(int idMedico, String nombres, String apellidos, String jvpm,
-                  String telefono, String correo, Especialidad especialidad) {
-        this.idMedico = idMedico;
-        this.nombres = nombres;
-        this.apellidos = apellidos;
-        this.jvpm = jvpm;
-        this.telefono = telefono;
-        this.correo = correo;
-        this.especialidad = especialidad;
-    }
-
-    public int getIdMedico() {
+    public Long getIdMedico() {
         return idMedico;
     }
 
-    public void setIdMedico(int idMedico) {
+    public void setIdMedico(Long idMedico) {
         this.idMedico = idMedico;
     }
 
+    // Sobrecarga por si algún método antiguo pasa un int
+    public void setIdMedico(int idMedico) {
+        this.idMedico = (long) idMedico;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
     public String getNombres() {
-        return nombres;
+        return nombre;
     }
 
     public void setNombres(String nombres) {
-        this.nombres = nombres;
+        this.nombre = nombres;
+    }
+
+    public String getApellido() {
+        return apellido;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
     }
 
     public String getApellidos() {
-        return apellidos;
+        return apellido;
     }
 
     public void setApellidos(String apellidos) {
-        this.apellidos = apellidos;
+        this.apellido = apellidos;
+    }
+
+    public String getDui() {
+        return dui;
+    }
+
+    public void setDui(String dui) {
+        this.dui = dui;
     }
 
     public String getJvpm() {
-        return jvpm;
+        return dui;
     }
 
     public void setJvpm(String jvpm) {
-        this.jvpm = jvpm;
+        this.dui = jvpm;
     }
 
     public String getTelefono() {
@@ -83,9 +119,5 @@ public class Medico {
 
     public void setEspecialidad(Especialidad especialidad) {
         this.especialidad = especialidad;
-    }
-
-    public String getNombreCompleto() {
-        return nombres + " " + apellidos;
     }
 }

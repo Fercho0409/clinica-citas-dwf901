@@ -41,7 +41,11 @@
             <artifactId>mysql-connector-j</artifactId>
             <version>8.4.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
+            <version>2.2</version>
+         </dependency>
         <!-- FASE 2: Hibernate como proveedor de JPA.
              Version 5.6 porque usa javax.persistence (Hibernate 6 usa
              jakarta.persistence y no es compatible con Tomcat 9) -->

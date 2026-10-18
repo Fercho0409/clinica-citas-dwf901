@@ -1,7 +1,6 @@
 package sv.edu.udb.clinica.controlador;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -40,14 +39,14 @@ public class PacienteServlet extends HttpServlet {
 
                 case "editar":
                     int idEdit = Integer.parseInt(request.getParameter("id"));
-                    Paciente pacienteAEditar = pacienteDAO.buscarPorId(idEdit); // Llamada corregida
+                    Paciente pacienteAEditar = pacienteDAO.buscarPorId(idEdit); 
                     request.setAttribute("paciente", pacienteAEditar);
                     request.getRequestDispatcher("/views/pacientes/formulario.jsp").forward(request, response);
                     break;
 
                 case "eliminar":
                     int idEliminar = Integer.parseInt(request.getParameter("id"));
-                    pacienteDAO.eliminar(idEliminar); // Llamada corregida
+                    pacienteDAO.eliminar(idEliminar); 
                     response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");
                     break;
 
@@ -55,7 +54,7 @@ public class PacienteServlet extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");
                     break;
             }
-        } catch (SQLException | NumberFormatException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");
         }
@@ -75,7 +74,8 @@ public class PacienteServlet extends HttpServlet {
         String telefono = request.getParameter("telefono");
         String correo = request.getParameter("correo");
         String direccion = request.getParameter("direccion");
-                if (nombres == null || nombres.trim().isEmpty()
+
+        if (nombres == null || nombres.trim().isEmpty()
                 || apellidos == null || apellidos.trim().isEmpty()
                 || dui == null || dui.trim().isEmpty()) {
             request.setAttribute("mensaje", "Los nombres, apellidos y DUI son obligatorios.");
@@ -96,20 +96,19 @@ public class PacienteServlet extends HttpServlet {
         paciente.setCorreo(correo);
         paciente.setDireccion(direccion);
 
-                try {
+        try {
             if (idStr == null || idStr.trim().isEmpty()) {
-                // Guardar nuevo registro
                 pacienteDAO.insertar(paciente);
             } else {
-                // Actualizar registro existente
                 paciente.setIdPaciente(Integer.parseInt(idStr));
                 pacienteDAO.actualizar(paciente);
             }
             response.sendRedirect(request.getContextPath() + "/pacientes?accion=listar");
 
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             String mensaje;
-            if (ex.getMessage() != null && ex.getMessage().contains("Duplicate entry")) {
+            String errorMsg = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+            if (errorMsg.contains("duplicate entry") || errorMsg.contains("constraint")) {
                 mensaje = "Ya existe un paciente registrado con el DUI " + dui + ".";
             } else {
                 mensaje = "No se pudo guardar el paciente: " + ex.getMessage();
