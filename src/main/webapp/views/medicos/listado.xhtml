@@ -75,6 +75,9 @@
                         <p:column headerText="Apellidos">
                             <h:outputText value="#{med.apellidos}"/>
                         </p:column>
+                        <p:column headerText="DUI" style="width:120px">
+                            <h:outputText value="#{med.dui}"/>
+                        </p:column>
                         <p:column headerText="Especialidad">
                             <h:outputText value="#{med.especialidad.nombre}"/>
                         </p:column>
@@ -122,6 +125,14 @@
                     <p:outputLabel for="mapellidos" value="Apellidos:"/>
                     <p:inputText id="mapellidos" value="#{medicoBean.medico.apellidos}"
                                  required="true" styleClass="form-control"/>
+
+                    <!-- Documento de identidad: el Bean lo exige y la tabla
+                         no admite valores repetidos ni vacios -->
+                    <p:outputLabel for="mdui" value="DUI:"/>
+                    <p:inputText id="mdui" value="#{medicoBean.medico.dui}"
+                                 required="true"
+                                 requiredMessage="El DUI es obligatorio"
+                                 styleClass="form-control" placeholder="00000000-0"/>
 
                     <!-- MENÚ DESPLEGABLE DE ESPECIALIDADES -->
                     <p:outputLabel for="mespecialidad" value="Especialidad:"/>

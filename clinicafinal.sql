@@ -201,6 +201,31 @@ INSERT INTO citas (id_paciente, id_medico, fecha, hora, estado, motivo) VALUES
 -- Ocupa el mismo horario que la cita cancelada (id 10): es válido
 -- porque la cancelada ya no cuenta
 (1, 4, DATE_ADD(CURDATE(), INTERVAL 3 DAY),  '09:00:00', 'PROGRAMADA',   'Alergia en la piel');
+-- ============================================================
+-- TABLA: usuarios  (NUEVA - FASE 2, control de acceso)
+-- ------------------------------------------------------------
+-- La genero Hibernate durante el desarrollo. Se incorpora al
+-- script para que el proyecto se pueda reproducir desde cero.
+--
+-- La clave se guarda sin cifrar: queda registrado como deuda
+-- tecnica para la Fase 4, que es la de seguridad.
+-- ============================================================
+
+CREATE TABLE usuarios (
+    id_usuario BIGINT NOT NULL AUTO_INCREMENT,
+    nombre_usuario VARCHAR(255) NOT NULL,
+    clave VARCHAR(255) NOT NULL,
+    nombre_completo VARCHAR(255) NOT NULL,
+    rol VARCHAR(255) NOT NULL,
+    activo BIT(1) NOT NULL DEFAULT b'1',
+    PRIMARY KEY (id_usuario),
+    UNIQUE KEY uk_usuario_nombre (nombre_usuario)
+) ENGINE=InnoDB
+  DEFAULT CHARACTER SET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO usuarios (nombre_usuario, clave, nombre_completo, rol, activo) VALUES
+('admin@clinica.com', 'admin123', 'Administrador del Sistema', 'ADMIN', b'1');
 
 -- ============================================================
 -- VERIFICACIÓN
