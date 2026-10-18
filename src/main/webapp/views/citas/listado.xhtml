@@ -17,7 +17,7 @@
 
         <div class="card card-warning card-outline">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-calendar-alt mr-2"/>Listado de Citas</h3>
+                <h3 class="card-title"><i class="fas fa-calendar-check mr-2"/>Listado de Citas</h3>
                 <div class="card-tools">
                     <h:form>
                         <p:commandButton value="Nueva Cita"
@@ -32,10 +32,10 @@
 
             <div class="card-body">
 
-                <!-- ===== Filtros ===== -->
+                <!-- ===== Filtros AJAX ===== -->
                 <h:form id="formFiltroCita">
                     <div class="row mb-3">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <p:inputText value="#{citaBean.filtroTexto}"
                                          placeholder="Buscar por paciente o médico..."
                                          styleClass="form-control">
@@ -53,7 +53,7 @@
                         </div>
                     </div>
 
-                    <!-- ===== Tabla ===== -->
+                    <!-- ===== Tabla Citas ===== -->
                     <p:dataTable id="tablaCitas"
                                  var="c"
                                  value="#{citaBean.citasFiltradas}"
@@ -76,10 +76,12 @@
                             <h:outputText value="#{c.medico.nombres} #{c.medico.apellidos}"/>
                         </p:column>
                         <p:column headerText="Fecha">
-                            <h:outputText value="#{c.fecha}"/>
+                            <h:outputText value="#{c.fechaCita}">
+                                <f:convertDateTime pattern="yyyy-MM-dd"/>
+                            </h:outputText>
                         </p:column>
                         <p:column headerText="Hora">
-                            <h:outputText value="#{c.hora}"/>
+                            <h:outputText value="#{c.horaCita}"/>
                         </p:column>
                         <p:column headerText="Estado">
                             <h:outputText value="#{c.estado}"/>
@@ -106,63 +108,53 @@
             </div>
         </div>
 
-        <!-- ===== Diálogo Crear/Editar ===== -->
+        <!-- ===== Diálogo Crear/Editar Cita ===== -->
         <p:dialog header="Datos de la Cita"
                   widgetVar="dlgCita"
                   modal="true"
                   responsive="true"
-                  width="640"
+                  width="600"
                   appendTo="@(body)"
                   showEffect="fade"
-                  hideEffect="fade">
+                  hideEffect="fade"
+                  styleClass="bg-white">
             <h:form id="formCita">
                 <p:panelGrid columns="2" layout="grid" styleClass="w-100" columnClasses="col-4,col-8">
                     <p:outputLabel for="cpaciente" value="Paciente:"/>
-                    <p:selectOneMenu id="cpaciente"
-                                     value="#{citaBean.idPacienteSeleccionado}"
+                    <p:selectOneMenu id="cpaciente" value="#{citaBean.idPacienteSeleccionado}"
                                      required="true" styleClass="form-control">
-                        <f:selectItem itemLabel="Seleccione..." itemValue=""/>
-                        <f:selectItems value="#{citaBean.pacientes}"
-                                       var="p" itemLabel="#{p.nombres} #{p.apellidos}" itemValue="#{p.idPaciente}"/>
+                        <f:selectItem itemLabel="-- Seleccionar Paciente --" itemValue=""/>
+                        <f:selectItems value="#{citaBean.listaPacientes}" var="p"
+                                       itemLabel="#{p.nombres} #{p.apellidos}" itemValue="#{p.idPaciente}"/>
                     </p:selectOneMenu>
 
                     <p:outputLabel for="cmedico" value="Médico:"/>
-                    <p:selectOneMenu id="cmedico"
-                                     value="#{citaBean.idMedicoSeleccionado}"
+                    <p:selectOneMenu id="cmedico" value="#{citaBean.idMedicoSeleccionado}"
                                      required="true" styleClass="form-control">
-                        <f:selectItem itemLabel="Seleccione..." itemValue=""/>
-                        <f:selectItems value="#{citaBean.medicos}"
-                                       var="m" itemLabel="#{m.nombres} #{m.apellidos}" itemValue="#{m.idMedico}"/>
+                        <f:selectItem itemLabel="-- Seleccionar Médico --" itemValue=""/>
+                        <f:selectItems value="#{citaBean.listaMedicos}" var="m"
+                                       itemLabel="#{m.nombres} #{m.apellidos} (#{m.especialidad})" itemValue="#{m.idMedico}"/>
                     </p:selectOneMenu>
 
-                    <p:outputLabel for="cfecha" value="Fecha:"/>
-                    <p:datePicker id="cfecha"
-                                  value="#{citaBean.cita.fecha}"
-                                  pattern="dd/MM/yyyy"
-                                  showButtonBar="true"
-                                  required="true"
-                                  styleClass="form-control"/>
+                    <p:outputLabel for="cfecha" value="Fecha Cita:"/>
+                    <p:datePicker id="cfecha" value="#{citaBean.cita.fechaCita}"
+                                  pattern="dd/MM/yyyy" showButtonBar="true"
+                                  required="true" styleClass="form-control"/>
 
                     <p:outputLabel for="chora" value="Hora:"/>
-                    <p:datePicker id="chora"
-                                  value="#{citaBean.cita.hora}"
-                                  timeOnly="true"
-                                  pattern="HH:mm"
-                                  required="true"
-                                  styleClass="form-control"/>
+                    <p:inputText id="chora" value="#{citaBean.cita.horaCita}"
+                                 required="true" styleClass="form-control" placeholder="10:00"/>
 
                     <p:outputLabel for="cestado" value="Estado:"/>
-                    <p:selectOneMenu id="cestado"
-                                     value="#{citaBean.cita.estado}"
-                                     required="true" styleClass="form-control">
+                    <p:selectOneMenu id="cestado" value="#{citaBean.cita.estado}" styleClass="form-control">
                         <f:selectItem itemLabel="PROGRAMADA" itemValue="PROGRAMADA"/>
                         <f:selectItem itemLabel="COMPLETADA" itemValue="COMPLETADA"/>
                         <f:selectItem itemLabel="CANCELADA" itemValue="CANCELADA"/>
+                        <f:selectItem itemLabel="REPROGRAMADA" itemValue="REPROGRAMADA"/>
                     </p:selectOneMenu>
 
                     <p:outputLabel for="cmotivo" value="Motivo:"/>
-                    <p:inputTextarea id="cmotivo"
-                                     value="#{citaBean.cita.motivo}"
+                    <p:inputTextarea id="cmotivo" value="#{citaBean.cita.motivo}"
                                      rows="2" styleClass="form-control"/>
                 </p:panelGrid>
 

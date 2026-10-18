@@ -32,7 +32,7 @@
 
             <div class="card-body">
 
-                <!-- ===== Filtros (HU-15 AJAX) ===== -->
+                <!-- ===== Filtros AJAX ===== -->
                 <h:form id="formFiltroPac">
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -53,7 +53,7 @@
                         </div>
                     </div>
 
-                    <!-- ===== Tabla ===== -->
+                    <!-- ===== Tabla Pacientes ===== -->
                     <p:dataTable id="tablaPacientes"
                                  var="pac"
                                  value="#{pacienteBean.pacientesFiltrados}"
@@ -106,7 +106,7 @@
             </div>
         </div>
 
-        <!-- ===== Diálogo Crear/Editar ===== -->
+        <!-- ===== Diálogo Crear/Editar con Validadores y maxdate ===== -->
         <p:dialog header="Datos del Paciente"
                   widgetVar="dlgPaciente"
                   modal="true"
@@ -118,36 +118,43 @@
                   styleClass="bg-white">
             <h:form id="formPaciente">
                 <p:panelGrid columns="2" layout="grid" styleClass="w-100" columnClasses="col-4,col-8">
-                    <p:outputLabel for="pnombres" value="Nombres:"/>
+                    <p:outputLabel for="pnombres" value="Nombres: *"/>
                     <p:inputText id="pnombres" value="#{pacienteBean.paciente.nombres}"
                                  required="true" styleClass="form-control"/>
 
-                    <p:outputLabel for="papellidos" value="Apellidos:"/>
+                    <p:outputLabel for="papellidos" value="Apellidos: *"/>
                     <p:inputText id="papellidos" value="#{pacienteBean.paciente.apellidos}"
                                  required="true" styleClass="form-control"/>
 
-                    <p:outputLabel for="pdui" value="DUI:"/>
+                    <p:outputLabel for="pdui" value="DUI: *"/>
                     <p:inputText id="pdui" value="#{pacienteBean.paciente.dui}"
                                  required="true" styleClass="form-control"
                                  placeholder="00000000-0">
                         <f:validator validatorId="duiValidator"/>
                     </p:inputText>
 
-                    <p:outputLabel for="pfecha" value="Fecha de nacimiento:"/>
+                    <p:outputLabel for="pfecha" value="Fecha de nacimiento: *"/>
                     <p:datePicker id="pfecha"
                                   value="#{pacienteBean.paciente.fechaNacimiento}"
                                   pattern="dd/MM/yyyy"
                                   showButtonBar="true"
                                   required="true"
-                                  styleClass="form-control"/>
+                                  maxdate="today"
+                                  styleClass="form-control">
+                        <f:validator validatorId="fechaNacimientoValidator"/>
+                    </p:datePicker>
 
                     <p:outputLabel for="ptelefono" value="Teléfono:"/>
                     <p:inputText id="ptelefono" value="#{pacienteBean.paciente.telefono}"
-                                 styleClass="form-control"/>
+                                 styleClass="form-control" placeholder="7000-0000">
+                        <f:validator validatorId="telefonoValidator"/>
+                    </p:inputText>
 
                     <p:outputLabel for="pcorreo" value="Correo:"/>
                     <p:inputText id="pcorreo" value="#{pacienteBean.paciente.correo}"
-                                 styleClass="form-control"/>
+                                 styleClass="form-control" placeholder="correo@ejemplo.com">
+                        <f:validator validatorId="emailValidator"/>
+                    </p:inputText>
 
                     <p:outputLabel for="pdireccion" value="Dirección:"/>
                     <p:inputTextarea id="pdireccion"

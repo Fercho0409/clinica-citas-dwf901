@@ -1,3 +1,95 @@
-/* Ajustes propios sobre AdminLTE */
-.ui-growl { z-index: 9999; }
-.ui-datatable table { width: 100%; }
+/* ===== Ajustes generales sobre AdminLTE ===== */
+.ui-growl { 
+    z-index: 99999 !important; 
+    top: 20px !important;
+    right: 20px !important;
+}
+
+.ui-datatable table { 
+    width: 100% !important; 
+}
+
+/* ===== Fondo sólido y opaco para los diálogos de PrimeFaces ===== */
+.ui-dialog {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3) !important;
+}
+
+.ui-dialog .ui-dialog-content {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+    background-color: #f4f6f9 !important;
+    background: #f4f6f9 !important;
+    color: #333333 !important;
+}
+
+/* ===== Capa modal translúcida de fondo ===== */
+.ui-widget-overlay {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    opacity: 0.5 !important;
+}
+
+/* ===== Alertas flotantes (p:growl) opacas y al frente ===== */
+.ui-growl-item-container {
+    opacity: 1 !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    border-radius: 6px !important;
+}
+
+.ui-growl-severity-error {
+    background-color: #f8d7da !important;
+    color: #721c24 !important;
+    border-left: 6px solid #dc3545 !important;
+}
+
+.ui-growl-severity-info {
+    background-color: #d4edda !important;
+    color: #155724 !important;
+    border-left: 6px solid #28a745 !important;
+}
+
+.ui-growl-title {
+    font-weight: bold !important;
+    font-size: 14px !important;
+}
+
+.ui-growl-message p {
+    font-size: 13px !important;
+    margin-top: 3px !important;
+}
+
+/* ===== Fondo sólido para el desplegable del DatePicker / Calendario ===== */
+.ui-datepicker-panel,
+.ui-datepicker,
+.ui-cc-panel {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+    z-index: 100000 !important;
+}
+
+.ui-datepicker-header {
+    background-color: #f4f6f9 !important;
+    background: #f4f6f9 !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.ui-datepicker-calendar {
+    background-color: #ffffff !important;
+}
+
+.ui-datepicker-calendar td a {
+    color: #333333 !important;
+}
+
+.ui-datepicker-calendar td a.ui-state-active,
+.ui-datepicker-calendar td a.ui-state-highlight {
+    background-color: #007bff !important;
+    color: #ffffff !important;
+}

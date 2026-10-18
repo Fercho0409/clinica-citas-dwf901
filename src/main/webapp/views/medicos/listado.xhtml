@@ -32,7 +32,7 @@
 
             <div class="card-body">
 
-                <!-- ===== Filtros ===== -->
+                <!-- ===== Filtros AJAX ===== -->
                 <h:form id="formFiltroMed">
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -53,7 +53,7 @@
                         </div>
                     </div>
 
-                    <!-- ===== Tabla ===== -->
+                    <!-- ===== Tabla Médicos ===== -->
                     <p:dataTable id="tablaMedicos"
                                  var="med"
                                  value="#{medicoBean.medicosFiltrados}"
@@ -76,7 +76,7 @@
                             <h:outputText value="#{med.apellidos}"/>
                         </p:column>
                         <p:column headerText="Especialidad">
-                            <h:outputText value="#{med.especialidad.nombre}"/>
+                            <h:outputText value="#{med.especialidad}"/>
                         </p:column>
                         <p:column headerText="Teléfono">
                             <h:outputText value="#{med.telefono}"/>
@@ -103,15 +103,16 @@
             </div>
         </div>
 
-        <!-- ===== Diálogo Crear/Editar ===== -->
+        <!-- ===== Diálogo Crear/Editar con Validadores ===== -->
         <p:dialog header="Datos del Médico"
                   widgetVar="dlgMedico"
                   modal="true"
                   responsive="true"
-                  width="640"
+                  width="600"
                   appendTo="@(body)"
                   showEffect="fade"
-                  hideEffect="fade">
+                  hideEffect="fade"
+                  styleClass="bg-white">
             <h:form id="formMedico">
                 <p:panelGrid columns="2" layout="grid" styleClass="w-100" columnClasses="col-4,col-8">
                     <p:outputLabel for="mnombres" value="Nombres:"/>
@@ -123,21 +124,20 @@
                                  required="true" styleClass="form-control"/>
 
                     <p:outputLabel for="mespecialidad" value="Especialidad:"/>
-                    <p:selectOneMenu id="mespecialidad"
-                                     value="#{medicoBean.idEspecialidadSeleccionada}"
-                                     required="true" styleClass="form-control">
-                        <f:selectItem itemLabel="Seleccione..." itemValue=""/>
-                        <f:selectItems value="#{medicoBean.especialidades}"
-                                       var="esp" itemLabel="#{esp.nombre}" itemValue="#{esp.idEspecialidad}"/>
-                    </p:selectOneMenu>
+                    <p:inputText id="mespecialidad" value="#{medicoBean.medico.especialidad}"
+                                 required="true" styleClass="form-control"/>
 
                     <p:outputLabel for="mtelefono" value="Teléfono:"/>
                     <p:inputText id="mtelefono" value="#{medicoBean.medico.telefono}"
-                                 styleClass="form-control"/>
+                                 styleClass="form-control" placeholder="7000-0000">
+                        <f:validator validatorId="telefonoValidator"/>
+                    </p:inputText>
 
                     <p:outputLabel for="mcorreo" value="Correo:"/>
                     <p:inputText id="mcorreo" value="#{medicoBean.medico.correo}"
-                                 styleClass="form-control"/>
+                                 styleClass="form-control" placeholder="medico@clinica.com">
+                        <f:validator validatorId="emailValidator"/>
+                    </p:inputText>
                 </p:panelGrid>
 
                 <div class="text-right mt-3">
