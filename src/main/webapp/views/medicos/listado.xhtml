@@ -76,7 +76,7 @@
                             <h:outputText value="#{med.apellidos}"/>
                         </p:column>
                         <p:column headerText="Especialidad">
-                            <h:outputText value="#{med.especialidad}"/>
+                            <h:outputText value="#{med.especialidad.nombre}"/>
                         </p:column>
                         <p:column headerText="Teléfono">
                             <h:outputText value="#{med.telefono}"/>
@@ -103,7 +103,7 @@
             </div>
         </div>
 
-        <!-- ===== Diálogo Crear/Editar con Validadores ===== -->
+        <!-- ===== Diálogo Crear/Editar con Menú Desplegable ===== -->
         <p:dialog header="Datos del Médico"
                   widgetVar="dlgMedico"
                   modal="true"
@@ -123,9 +123,19 @@
                     <p:inputText id="mapellidos" value="#{medicoBean.medico.apellidos}"
                                  required="true" styleClass="form-control"/>
 
+                    <!-- MENÚ DESPLEGABLE DE ESPECIALIDADES -->
                     <p:outputLabel for="mespecialidad" value="Especialidad:"/>
-                    <p:inputText id="mespecialidad" value="#{medicoBean.medico.especialidad}"
-                                 required="true" styleClass="form-control"/>
+                    <p:selectOneMenu id="mespecialidad"
+                                     value="#{medicoBean.idEspecialidadSeleccionada}"
+                                     required="true"
+                                     requiredMessage="Debe seleccionar una especialidad"
+                                     styleClass="form-control" style="width: 100%;">
+                        <f:selectItem itemLabel="-- Seleccione una especialidad --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{medicoBean.especialidades}"
+                                       var="esp"
+                                       itemLabel="#{esp.nombre}"
+                                       itemValue="#{esp.idEspecialidad}"/>
+                    </p:selectOneMenu>
 
                     <p:outputLabel for="mtelefono" value="Teléfono:"/>
                     <p:inputText id="mtelefono" value="#{medicoBean.medico.telefono}"
