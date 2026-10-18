@@ -114,7 +114,8 @@
                   width="640"
                   appendTo="@(body)"
                   showEffect="fade"
-                  hideEffect="fade">
+                  hideEffect="fade"
+                  styleClass="bg-white">
             <h:form id="formPaciente">
                 <p:panelGrid columns="2" layout="grid" styleClass="w-100" columnClasses="col-4,col-8">
                     <p:outputLabel for="pnombres" value="Nombres:"/>
@@ -128,7 +129,9 @@
                     <p:outputLabel for="pdui" value="DUI:"/>
                     <p:inputText id="pdui" value="#{pacienteBean.paciente.dui}"
                                  required="true" styleClass="form-control"
-                                 placeholder="00000000-0"/>
+                                 placeholder="00000000-0">
+                        <f:validator validatorId="duiValidator"/>
+                    </p:inputText>
 
                     <p:outputLabel for="pfecha" value="Fecha de nacimiento:"/>
                     <p:datePicker id="pfecha"

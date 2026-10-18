@@ -14,6 +14,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700"/>
     <h:outputStylesheet library="css" name="custom.css"/>
+
+    <!-- Reglas para forzar fondo sólido y evitar transparencia en diálogos PrimeFaces -->
+    <style>
+        .ui-dialog {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .ui-dialog .ui-dialog-content {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+        }
+
+        .ui-dialog .ui-dialog-titlebar {
+            background-color: #f4f6f9 !important;
+            background: #f4f6f9 !important;
+            color: #333333 !important;
+        }
+
+        .ui-widget-overlay {
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            opacity: 0.5 !important;
+        }
+    </style>
 </h:head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
