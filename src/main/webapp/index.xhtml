@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<h:head/>
+<body>
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">Inicio</ui:define>
+    <ui:define name="tituloPagina">Panel Principal</ui:define>
+    <ui:define name="contenido">
+        <div class="row">
+            <div class="col-lg-4 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner"><h3>Pacientes</h3><p>Gestión de pacientes</p></div>
+                    <div class="icon"><i class="fas fa-users"/></div>
+                    <a href="#{request.contextPath}/views/pacientes/listado.xhtml" class="small-box-footer">
+                        Ir <i class="fas fa-arrow-circle-right"/>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner"><h3>Médicos</h3><p>Gestión de médicos</p></div>
+                    <div class="icon"><i class="fas fa-user-md"/></div>
+                    <a href="#{request.contextPath}/views/medicos/listado.xhtml" class="small-box-footer">
+                        Ir <i class="fas fa-arrow-circle-right"/>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner"><h3>Citas</h3><p>Agenda de citas</p></div>
+                    <div class="icon"><i class="fas fa-calendar-check"/></div>
+                    <a href="#{request.contextPath}/views/citas/listado.xhtml" class="small-box-footer">
+                        Ir <i class="fas fa-arrow-circle-right"/>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+</body>
+</html>

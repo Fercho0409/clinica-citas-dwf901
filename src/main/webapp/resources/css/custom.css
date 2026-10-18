@@ -1,0 +1,3 @@
+/* Ajustes propios sobre AdminLTE */
+.ui-growl { z-index: 9999; }
+.ui-datatable table { width: 100%; }

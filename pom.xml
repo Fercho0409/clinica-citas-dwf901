@@ -15,10 +15,19 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>21</maven.compiler.release>
+        <mojarra.version>2.2.20</mojarra.version>
+        <primefaces.version>8.0</primefaces.version>
         <hibernate.version>5.6.15.Final</hibernate.version>
     </properties>
 
     <dependencies>
+
+        <!-- Anotaciones estandar de Java EE: PostConstruct en los Managed Beans -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+        </dependency>
 
         <!-- API de Servlet. scope=provided porque la aporta Tomcat -->
         <dependency>
@@ -28,25 +37,35 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSTL: etiquetas c:forEach, c:if para las vistas JSP -->
+        <!-- JSTL: lo necesitan Facelets y las vistas JSP que quedan de la Fase 1 -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
 
-        <!-- Driver JDBC de MySQL (artefacto nuevo) -->
+        <!-- JSF 2.2 (Mojarra). Version javax, compatible con Tomcat 9 -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.faces</artifactId>
+            <version>${mojarra.version}</version>
+        </dependency>
+
+        <!-- PrimeFaces 12: componentes, AJAX y dialogos -->
+        <dependency>
+            <groupId>org.primefaces</groupId>
+            <artifactId>primefaces</artifactId>
+            <version>${primefaces.version}</version>
+        </dependency>
+
+        <!-- Driver JDBC de MySQL -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>8.4.0</version>
         </dependency>
-        <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>javax.persistence-api</artifactId>
-            <version>2.2</version>
-         </dependency>
-        <!-- FASE 2: Hibernate como proveedor de JPA.
+
+        <!-- Hibernate como proveedor de JPA.
              Version 5.6 porque usa javax.persistence (Hibernate 6 usa
              jakarta.persistence y no es compatible con Tomcat 9) -->
         <dependency>
@@ -64,6 +83,24 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.4.0</version>
+                <configuration>
+                    <!-- Estos JAR de CDI entran como dependencia de PrimeFaces
+                         pero Tomcat no administra CDI: si se empaquetan, JSF
+                         falla al arrancar buscando un contenedor que no existe -->
+                    <packagingExcludes>
+                        WEB-INF/lib/cdi-api-*.jar,
+                        WEB-INF/lib/javax.inject-*.jar,
+                        WEB-INF/lib/jakarta.inject-*.jar
+                    </packagingExcludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>21</release>
+                </configuration>
             </plugin>
         </plugins>
     </build>

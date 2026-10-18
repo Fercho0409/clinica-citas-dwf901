@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+<h:head />
+
+<body>
+    <ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+        <ui:define name="titulo">Citas</ui:define>
+        <ui:define name="tituloPagina">Agenda de Citas</ui:define>
+
+        <ui:define name="contenido">
+
+            <p:growl id="growlCita" showDetail="true" life="6000" />
+
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-calendar-check mr-2" />Listado de Citas</h3>
+                    <div class="card-tools">
+                        <h:form>
+                            <p:commandButton value="Nueva Cita" icon="fas fa-plus" actionListener="#{citaBean.nueva}"
+                                oncomplete="PF('dlgCita').show()" update=":formCita"
+                                styleClass="btn btn-primary btn-sm" />
+                        </h:form>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- ===== Filtros ===== -->
+                    <h:form id="formFiltroCita">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <p:inputText value="#{citaBean.filtroTexto}" placeholder="Paciente o DUI..."
+                                    styleClass="form-control">
+                                    <p:ajax event="keyup" delay="400" listener="#{citaBean.filtrar}"
+                                        update="tablaCitas" />
+                                </p:inputText>
+                            </div>
+                            <div class="col-md-3">
+                                <p:selectOneMenu value="#{citaBean.filtroMedico}" styleClass="form-control">
+                                    <f:selectItem itemLabel="-- Todos los médicos --" itemValue="#{null}" />
+                                    <f:selectItems value="#{citaBean.medicos}" var="m" itemValue="#{m.idMedico}"
+                                        itemLabel="#{m.nombreCompleto}" />
+                                    <p:ajax event="change" listener="#{citaBean.filtrar}" update="tablaCitas" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="col-md-2">
+                                <p:selectOneMenu value="#{citaBean.filtroEstado}" styleClass="form-control">
+                                    <f:selectItem itemLabel="-- Estado --" itemValue="#{null}" />
+                                    <f:selectItem itemLabel="PROGRAMADA" itemValue="PROGRAMADA" />
+                                    <f:selectItem itemLabel="REPROGRAMADA" itemValue="REPROGRAMADA" />
+                                    <f:selectItem itemLabel="ATENDIDA" itemValue="ATENDIDA" />
+                                    <f:selectItem itemLabel="CANCELADA" itemValue="CANCELADA" />
+                                    <p:ajax event="change" listener="#{citaBean.filtrar}" update="tablaCitas" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="col-md-2">
+                                <p:datePicker value="#{citaBean.filtroFecha}" pattern="dd/MM/yyyy"
+                                    styleClass="form-control" placeholder="Fecha">
+                                    <p:ajax event="dateSelect" listener="#{citaBean.filtrar}" update="tablaCitas" />
+                                </p:datePicker>
+                            </div>
+                            <div class="col-md-2">
+                                <p:commandButton value="Limpiar" icon="fas fa-eraser"
+                                    actionListener="#{citaBean.limpiarFiltros}" update="formFiltroCita tablaCitas"
+                                    styleClass="btn btn-secondary" />
+                            </div>
+                        </div>
+                    
+
+                    <!-- ===== Tabla ===== -->
+                    <p:dataTable id="tablaCitas" var="c" value="#{citaBean.citasFiltradas}"
+                        styleClass="table table-striped table-hover" emptyMessage="No hay citas registradas" rows="10"
+                        paginator="true" paginatorPosition="bottom"
+                        paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                        rowsPerPageTemplate="5,10,25,50"
+                        currentPageReportTemplate="Mostrando {startRecord} a {endRecord} de {totalRecords}">
+
+                        <p:column headerText="ID" style="width:60px">
+                            <h:outputText value="#{c.idCita}" />
+                        </p:column>
+                        <p:column headerText="Fecha">
+                            <h:outputText value="#{c.fechaTexto}" />
+                        </p:column>
+                        <p:column headerText="Hora">
+                            <h:outputText value="#{c.horaTexto}" />
+                        </p:column>
+                        <p:column headerText="Paciente">
+                            <h:outputText value="#{c.paciente.nombreCompleto}" />
+                        </p:column>
+                        <p:column headerText="Médico">
+                            <h:outputText value="#{c.medico.nombreCompleto}" />
+                        </p:column>
+                        <p:column headerText="Especialidad">
+                            <span class="badge badge-info">
+                                <h:outputText value="#{c.medico.especialidad.nombre}" />
+                            </span>
+                        </p:column>
+                        <p:column headerText="Motivo">
+                            <h:outputText value="#{c.motivo}" />
+                        </p:column>
+                        <p:column headerText="Estado" styleClass="text-center" style="width:120px">
+                            <span class="badge #{citaBean.badgeEstado(c.estado)}">
+                                <h:outputText value="#{c.estado}" />
+                            </span>
+                        </p:column>
+                        <p:column headerText="Acciones" styleClass="text-center" style="width:220px">
+                            <p:commandButton icon="fas fa-edit" title="Editar" actionListener="#{citaBean.editar(c)}"
+                                oncomplete="PF('dlgCita').show()" update=":formCita"
+                                styleClass="btn btn-warning btn-sm mr-1"
+                                rendered="#{c.estado ne 'CANCELADA' and c.estado ne 'ATENDIDA'}" />
+                            <p:commandButton icon="fas fa-check" title="Marcar atendida"
+                                actionListener="#{citaBean.marcarAtendida(c)}"
+                                update="growlCita tablaCitas formFiltroCita" styleClass="btn btn-success btn-sm mr-1"
+                                rendered="#{c.estado eq 'PROGRAMADA' or c.estado eq 'REPROGRAMADA'}" />
+                            <p:commandButton icon="fas fa-ban" title="Cancelar" actionListener="#{citaBean.cancelar(c)}"
+                                update="growlCita tablaCitas formFiltroCita" styleClass="btn btn-danger btn-sm"
+                                rendered="#{c.estado ne 'CANCELADA' and c.estado ne 'ATENDIDA'}"
+                                onclick="return confirm('¿Cancelar esta cita?');" />
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
+                </div>
+            </div>
+
+            <!-- ===== Diálogo Crear/Editar ===== -->
+            <p:dialog header="Datos de la Cita" widgetVar="dlgCita" modal="true" responsive="true" width="640"
+                appendTo="@(body)" showEffect="fade" hideEffect="fade">
+                <h:form id="formCita">
+                    <p:panelGrid columns="2" layout="grid" styleClass="w-100" columnClasses="col-4,col-8">
+                        <p:outputLabel for="cpac" value="Paciente:" />
+                        <p:selectOneMenu id="cpac" value="#{citaBean.idPacienteSeleccionado}" required="true"
+                            styleClass="form-control">
+                            <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}" />
+                            <f:selectItems value="#{citaBean.pacientes}" var="p" itemValue="#{p.idPaciente}"
+                                itemLabel="#{p.nombreCompleto} (#{p.dui})" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel for="cmed" value="Médico:" />
+                        <p:selectOneMenu id="cmed" value="#{citaBean.idMedicoSeleccionado}" required="true"
+                            styleClass="form-control">
+                            <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}" />
+                            <f:selectItems value="#{citaBean.medicos}" var="m" itemValue="#{m.idMedico}"
+                                itemLabel="#{m.nombreCompleto} — #{m.especialidad.nombre}" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel for="cfecha" value="Fecha:" />
+                        <p:datePicker id="cfecha" value="#{citaBean.cita.fecha}" pattern="dd/MM/yyyy" required="true"
+                            styleClass="form-control" />
+
+                        <p:outputLabel for="chora" value="Hora (HH:mm):" />
+                        <p:inputText id="chora" value="#{citaBean.horaStr}" required="true" styleClass="form-control"
+                            placeholder="09:00" />
+
+                        <p:outputLabel for="cmotivo" value="Motivo:" />
+                        <p:inputTextarea id="cmotivo" value="#{citaBean.cita.motivo}" rows="2"
+                            styleClass="form-control" />
+
+                        <p:outputLabel for="cestado" value="Estado:" />
+                        <p:selectOneMenu id="cestado" value="#{citaBean.cita.estado}" styleClass="form-control">
+                            <f:selectItem itemLabel="PROGRAMADA" itemValue="PROGRAMADA" />
+                            <f:selectItem itemLabel="REPROGRAMADA" itemValue="REPROGRAMADA" />
+                            <f:selectItem itemLabel="ATENDIDA" itemValue="ATENDIDA" />
+                            <f:selectItem itemLabel="CANCELADA" itemValue="CANCELADA" />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+
+                    <div class="text-right mt-3">
+                        <p:commandButton value="Guardar" icon="fas fa-save" actionListener="#{citaBean.guardar}"
+                            update="growlCita tablaCitas formFiltroCita @form"
+                            oncomplete="if (!args.validationFailed) PF('dlgCita').hide();"
+                            styleClass="btn btn-primary" />
+                        <p:commandButton value="Cancelar" icon="fas fa-times" type="button"
+                            onclick="PF('dlgCita').hide()" styleClass="btn btn-secondary ml-2" />
+                    </div>
+                </h:form>
+            </p:dialog>
+
+        </ui:define>
+    </ui:composition>
+</body>
+
+</html>

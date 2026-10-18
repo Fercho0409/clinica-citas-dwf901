@@ -2,13 +2,26 @@ package sv.edu.udb.clinica.modelo;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import javax.persistence.*;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
+/**
+ * Paciente de la clinica.
+ */
 @Entity
 @Table(name = "pacientes")
 public class Paciente implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    private static final DateTimeFormatter FORMATO_FECHA =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -114,8 +127,39 @@ public class Paciente implements Serializable {
         this.direccion = direccion;
     }
 
-    /** Método de conveniencia para mostrar el nombre completo en las vistas. */
+    /** Metodo de conveniencia para mostrar el nombre completo en las vistas. */
     public String getNombreCompleto() {
         return nombres + " " + apellidos;
+    }
+
+    /**
+     * Fecha de nacimiento lista para mostrar.
+     *
+     * Se formatea aqui y no con f:convertDateTime porque el convertidor
+     * de JSF 2.2 no sabe manejar LocalDate: eso se agrego en JSF 2.3.
+     */
+    public String getFechaNacimientoTexto() {
+        return fechaNacimiento != null ? fechaNacimiento.format(FORMATO_FECHA) : "";
+    }
+
+    @Override
+    public boolean equals(Object objeto) {
+        if (this == objeto) {
+            return true;
+        }
+        if (!(objeto instanceof Paciente)) {
+            return false;
+        }
+        return Objects.equals(idPaciente, ((Paciente) objeto).idPaciente);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(idPaciente);
+    }
+
+    @Override
+    public String toString() {
+        return getNombreCompleto() + " (" + dui + ")";
     }
 }
