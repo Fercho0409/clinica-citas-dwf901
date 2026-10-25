@@ -37,9 +37,9 @@
                 </li>
                 <li class="nav-item">
                     <h:form>
-                        <p:commandButton value="Cerrar Sesión" 
-                                         icon="fas fa-sign-out-alt" 
-                                         action="#{loginBean.cerrarSesion}" 
+                        <p:commandButton value="Cerrar Sesión"
+                                         icon="fas fa-sign-out-alt"
+                                         action="#{loginBean.cerrarSesion}"
                                          styleClass="btn btn-outline-danger btn-sm"/>
                     </h:form>
                 </li>
@@ -71,6 +71,13 @@
                             <h:link outcome="/views/citas/listado.xhtml" styleClass="nav-link">
                                 <i class="nav-icon fas fa-calendar-check"></i>
                                 <p>Citas</p>
+                            </h:link>
+                        </li>
+                        <!-- HU-14: agenda diaria del medico -->
+                        <li class="nav-item">
+                            <h:link outcome="/views/citas/agenda.xhtml" styleClass="nav-link">
+                                <i class="nav-icon fas fa-calendar-day"></i>
+                                <p>Agenda del Día</p>
                             </h:link>
                         </li>
                     </ul>

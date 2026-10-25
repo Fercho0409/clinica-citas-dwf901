@@ -49,7 +49,7 @@ public class CitaDAO {
 
     /**
      * Agenda del dia de un medico (HU-14).
-     * Solo las citas que siguen vigentes, ordenadas por hora.
+     * Todas las citas del medico ese dia, ordenadas por hora, cualquiera sea su estado
      */
     public List<Cita> agendaDelDia(Integer idMedico, LocalDate fecha) {
         EntityManager em = JPAUtil.getEntityManager();
@@ -60,13 +60,10 @@ public class CitaDAO {
                     + "JOIN FETCH c.medico "
                     + "WHERE c.medico.idMedico = :idMedico "
                     + "AND c.fecha = :fecha "
-                    + "AND c.estado IN (:programada, :reprogramada) "
                     + "ORDER BY c.hora",
                     Cita.class)
                     .setParameter("idMedico", idMedico)
                     .setParameter("fecha", fecha)
-                    .setParameter("programada", EstadoCita.PROGRAMADA)
-                    .setParameter("reprogramada", EstadoCita.REPROGRAMADA)
                     .getResultList();
         } finally {
             em.close();

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Agenda del Medico</ui:define>
+
+    <ui:define name="tituloPagina">Agenda del Día</ui:define>
+
+    <ui:define name="contenido">
+        <h:form id="formAgenda">
+            <p:growl id="msgAgenda" showDetail="true" life="5000" />
+
+            <div class="card card-info card-outline">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-calendar-day mr-2"/>Consulta de agenda
+                    </h3>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- ===== Selección de médico y fecha ===== -->
+                    <div class="row mb-3">
+                        <div class="col-md-5">
+                            <p:outputLabel for="medico" value="Médico:" styleClass="d-block" />
+                            <p:selectOneMenu id="medico"
+                                             value="#{agendaBean.idMedicoSeleccionado}"
+                                             styleClass="form-control" style="width:100%">
+                                <f:selectItem itemLabel="-- Seleccione un médico --"
+                                              itemValue="#{null}" noSelectionOption="true" />
+                                <f:selectItems value="#{agendaBean.medicos}" var="m"
+                                               itemValue="#{m.idMedico}"
+                                               itemLabel="#{m.nombres} #{m.apellidos} - #{m.especialidad.nombre}" />
+                                <p:ajax event="change" listener="#{agendaBean.buscar}"
+                                        update=":formAgenda:panelAgenda :formAgenda:msgAgenda" />
+                            </p:selectOneMenu>
+                        </div>
+
+                        <div class="col-md-4">
+                            <p:outputLabel for="fecha" value="Fecha:" styleClass="d-block" />
+                            <p:datePicker id="fecha" value="#{agendaBean.fecha}"
+                                          pattern="dd/MM/yyyy" showButtonBar="true"
+                                          style="width:100%">
+                                <p:ajax event="dateSelect" listener="#{agendaBean.buscar}"
+                                        update=":formAgenda:panelAgenda :formAgenda:msgAgenda" />
+                            </p:datePicker>
+                        </div>
+
+                        <div class="col-md-3 d-flex align-items-end">
+                            <p:commandButton value="Anterior" icon="fas fa-chevron-left"
+                                             actionListener="#{agendaBean.diaAnterior}"
+                                             update=":formAgenda"
+                                             styleClass="btn btn-secondary btn-sm mr-1" />
+                            <p:commandButton value="Hoy" icon="fas fa-calendar-check"
+                                             actionListener="#{agendaBean.hoy}"
+                                             update=":formAgenda"
+                                             styleClass="btn btn-info btn-sm mr-1" />
+                            <p:commandButton value="Siguiente" icon="fas fa-chevron-right"
+                                             actionListener="#{agendaBean.diaSiguiente}"
+                                             update=":formAgenda"
+                                             styleClass="btn btn-secondary btn-sm" />
+                        </div>
+                    </div>
+
+                    <!-- ===== Resultado ===== -->
+                    <p:outputPanel id="panelAgenda">
+
+                        <div class="alert alert-light border mb-3">
+                            <strong>#{agendaBean.medicoSeleccionadoNombre}</strong>
+                            <span> &#8212; #{agendaBean.fechaTexto}</span>
+                            <span class="float-right">
+                                <span class="badge badge-primary mr-1">
+                                    Vigentes: #{agendaBean.cantidadVigentes}
+                                </span>
+                                <span class="badge badge-success mr-1">
+                                    Atendidas: #{agendaBean.cantidadAtendidas}
+                                </span>
+                                <span class="badge badge-danger">
+                                    Canceladas: #{agendaBean.cantidadCanceladas}
+                                </span>
+                            </span>
+                        </div>
+
+                        <p:dataTable id="tablaAgenda" var="c" value="#{agendaBean.agenda}"
+                                     styleClass="table table-striped table-hover"
+                                     emptyMessage="Este médico no tiene citas en la fecha seleccionada."
+                                     reflow="true">
+
+                            <p:column headerText="Hora" style="width:90px">
+                                <h:outputText value="#{c.horaTexto}" />
+                            </p:column>
+
+                            <p:column headerText="Paciente">
+                                <h:outputText value="#{c.paciente.nombres} #{c.paciente.apellidos}" />
+                            </p:column>
+
+                            <p:column headerText="DUI" style="width:130px">
+                                <h:outputText value="#{c.paciente.dui}" />
+                            </p:column>
+
+                            <p:column headerText="Teléfono" style="width:130px">
+                                <h:outputText value="#{c.paciente.telefono}" />
+                            </p:column>
+
+                            <p:column headerText="Motivo">
+                                <h:outputText value="#{c.motivo}" />
+                            </p:column>
+
+                            <p:column headerText="Estado" style="width:130px">
+                                <h:outputText value="#{c.estado.etiqueta}"
+                                              styleClass="#{agendaBean.badgeEstado(c.estado)}" />
+                            </p:column>
+                        </p:dataTable>
+                    </p:outputPanel>
+                </div>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>
