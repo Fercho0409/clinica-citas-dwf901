@@ -74,6 +74,31 @@
             <version>${hibernate.version}</version>
         </dependency>
 
+        <!-- ========================================== -->
+        <!-- NUEVO: Dependencias de Jersey para la API REST -->
+        <!-- ========================================== -->
+
+        <!-- Jersey Container Servlet para manejar rutas REST -->
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <version>2.35</version>
+        </dependency>
+
+        <!-- Soporte JSON con Jackson para serializar objetos a JSON automáticamente -->
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>2.35</version>
+        </dependency>
+
+        <!-- Inyección de dependencias HK2 (necesaria para el funcionamiento interno de Jersey) -->
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>2.35</version>
+        </dependency>
+
     </dependencies>
 
     <build>

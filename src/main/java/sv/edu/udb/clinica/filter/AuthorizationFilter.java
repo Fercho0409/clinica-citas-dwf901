@@ -32,8 +32,9 @@ public class AuthorizationFilter implements Filter {
 
         boolean isLoginRequest = uri.endsWith("login.xhtml");
         boolean isResourceRequest = uri.contains("/javax.faces.resource/") || uri.contains("/resources/");
+        boolean isApiRequest = uri.contains("/api/"); // Permite el paso libre a cualquier ruta REST
 
-        if (loggedIn || isLoginRequest || isResourceRequest) {
+        if (loggedIn || isLoginRequest || isResourceRequest || isApiRequest) {
             chain.doFilter(request, response);
         } else {
             res.sendRedirect(req.getContextPath() + "/login.xhtml");
