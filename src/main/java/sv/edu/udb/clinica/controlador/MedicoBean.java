@@ -164,8 +164,12 @@ public class MedicoBean implements Serializable {
     }
 
     private void error(String mensaje) {
-        FacesContext.getCurrentInstance().addMessage(null,
+        FacesContext contexto = FacesContext.getCurrentInstance();
+        contexto.addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, "Atencion", mensaje));
+        // Marca la peticion como fallida para que el dialogo no se cierre
+        // (oncomplete revisa args.validationFailed)
+        contexto.validationFailed();
     }
 
     public List<Medico> getMedicos() {

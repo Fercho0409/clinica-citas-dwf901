@@ -22,7 +22,7 @@
                     <h:form>
                         <p:commandButton value="Nueva Cita"
                                          icon="fas fa-plus"
-                                         actionListener="#{citaBean.nuevo}"
+                                         actionListener="#{citaBean.nueva}"
                                          oncomplete="PF('dlgCita').show()"
                                          update=":formCita"
                                          styleClass="btn btn-warning btn-sm"/>
@@ -37,7 +37,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <p:inputText value="#{citaBean.filtroTexto}"
-                                         placeholder="Buscar por paciente o médico..."
+                                         placeholder="Buscar por nombre o DUI del paciente..."
                                          styleClass="form-control">
                                 <p:ajax event="keyup" delay="400"
                                         listener="#{citaBean.filtrar}"
@@ -76,26 +76,37 @@
                             <h:outputText value="#{c.medico.nombres} #{c.medico.apellidos}"/>
                         </p:column>
                         <p:column headerText="Fecha">
-                            <h:outputText value="#{c.fechaCita}">
-                                <f:convertDateTime pattern="yyyy-MM-dd"/>
-                            </h:outputText>
+                            <h:outputText value="#{c.fechaTexto}"/>
                         </p:column>
                         <p:column headerText="Hora">
-                            <h:outputText value="#{c.horaCita}"/>
+                            <h:outputText value="#{c.horaTexto}"/>
                         </p:column>
                         <p:column headerText="Estado">
-                            <h:outputText value="#{c.estado}"/>
+                            <span class="badge #{citaBean.badgeEstado(c.estado)}">#{c.estado.etiqueta}</span>
                         </p:column>
                         <p:column headerText="Motivo">
                             <h:outputText value="#{c.motivo}"/>
                         </p:column>
-                        <p:column headerText="Acciones" styleClass="text-center" style="width:130px">
+                        <p:column headerText="Acciones" styleClass="text-center" style="width:190px">
                             <p:commandButton icon="fas fa-edit"
                                              title="Editar"
                                              actionListener="#{citaBean.editar(c)}"
                                              oncomplete="PF('dlgCita').show()"
                                              update=":formCita"
                                              styleClass="btn btn-warning btn-sm mr-1"/>
+                            <p:commandButton icon="fas fa-check"
+                                             title="Marcar como atendida"
+                                             rendered="#{c.modificable}"
+                                             actionListener="#{citaBean.marcarAtendida(c)}"
+                                             update=":growlCita tablaCitas"
+                                             styleClass="btn btn-success btn-sm mr-1"/>
+                            <p:commandButton icon="fas fa-ban"
+                                             title="Cancelar cita"
+                                             rendered="#{c.modificable}"
+                                             actionListener="#{citaBean.cancelar(c)}"
+                                             update=":growlCita tablaCitas"
+                                             styleClass="btn btn-secondary btn-sm mr-1"
+                                             onclick="return confirm('¿Cancelar esta cita? El horario quedará libre.');"/>
                             <p:commandButton icon="fas fa-trash"
                                              title="Eliminar"
                                              actionListener="#{citaBean.eliminar(c)}"
@@ -124,7 +135,7 @@
                     <p:selectOneMenu id="cpaciente" value="#{citaBean.idPacienteSeleccionado}"
                                      required="true" styleClass="form-control">
                         <f:selectItem itemLabel="-- Seleccionar Paciente --" itemValue=""/>
-                        <f:selectItems value="#{citaBean.listaPacientes}" var="p"
+                        <f:selectItems value="#{citaBean.pacientes}" var="p"
                                        itemLabel="#{p.nombres} #{p.apellidos}" itemValue="#{p.idPaciente}"/>
                     </p:selectOneMenu>
 
@@ -132,23 +143,23 @@
                     <p:selectOneMenu id="cmedico" value="#{citaBean.idMedicoSeleccionado}"
                                      required="true" styleClass="form-control">
                         <f:selectItem itemLabel="-- Seleccionar Médico --" itemValue=""/>
-                        <f:selectItems value="#{citaBean.listaMedicos}" var="m"
-                                       itemLabel="#{m.nombres} #{m.apellidos} (#{m.especialidad})" itemValue="#{m.idMedico}"/>
+                        <f:selectItems value="#{citaBean.medicos}" var="m"
+                                       itemLabel="#{m.nombres} #{m.apellidos} (#{m.especialidad.nombre})" itemValue="#{m.idMedico}"/>
                     </p:selectOneMenu>
 
                     <p:outputLabel for="cfecha" value="Fecha Cita:"/>
-                    <p:datePicker id="cfecha" value="#{citaBean.cita.fechaCita}"
+                    <p:datePicker id="cfecha" value="#{citaBean.cita.fecha}"
                                   pattern="dd/MM/yyyy" showButtonBar="true"
                                   required="true" styleClass="form-control"/>
 
                     <p:outputLabel for="chora" value="Hora:"/>
-                    <p:inputText id="chora" value="#{citaBean.cita.horaCita}"
+                    <p:inputText id="chora" value="#{citaBean.horaStr}"
                                  required="true" styleClass="form-control" placeholder="10:00"/>
 
                     <p:outputLabel for="cestado" value="Estado:"/>
                     <p:selectOneMenu id="cestado" value="#{citaBean.cita.estado}" styleClass="form-control">
                         <f:selectItem itemLabel="PROGRAMADA" itemValue="PROGRAMADA"/>
-                        <f:selectItem itemLabel="COMPLETADA" itemValue="COMPLETADA"/>
+                        <f:selectItem itemLabel="ATENDIDA" itemValue="ATENDIDA"/>
                         <f:selectItem itemLabel="CANCELADA" itemValue="CANCELADA"/>
                         <f:selectItem itemLabel="REPROGRAMADA" itemValue="REPROGRAMADA"/>
                     </p:selectOneMenu>

@@ -144,15 +144,15 @@ INSERT INTO pacientes
 (nombres, apellidos, dui, fecha_nacimiento, telefono, correo, direccion)
 VALUES
 ('Carlos', 'Martínez', '01234567-8', '1995-03-15', '7012-3456', 'carlos.martinez@gmail.com', 'San Salvador'),
-('Ana', 'Gómez', '12345678-9', '1998-07-22', '7123-4567', 'ana.gomez@gmail.com', 'Santa Tecla'),
+('Ana', 'Gómez', '12345678-4', '1998-07-22', '7123-4567', 'ana.gomez@gmail.com', 'Santa Tecla'),
 ('José', 'Hernández', '23456789-0', '1987-11-08', '7234-5678', 'jose.hernandez@gmail.com', 'Soyapango'),
-('María', 'López', '34567890-1', '2001-01-30', '7345-6789', 'maria.lopez@gmail.com', 'Antiguo Cuscatlán'),
+('María', 'López', '34567890-6', '2001-01-30', '7345-6789', 'maria.lopez@gmail.com', 'Antiguo Cuscatlán'),
 ('Luis', 'Ramírez', '45678901-2', '1992-05-17', '7456-7890', 'luis.ramirez@gmail.com', 'San Marcos'),
-('Sofía', 'Castro', '56789012-3', '1999-09-25', '7567-8901', 'sofia.castro@gmail.com', 'Mejicanos'),
+('Sofía', 'Castro', '56789012-8', '1999-09-25', '7567-8901', 'sofia.castro@gmail.com', 'Mejicanos'),
 ('Miguel', 'Flores', '67890123-4', '1985-12-12', '7678-9012', 'miguel.flores@gmail.com', 'Apopa'),
-('Laura', 'Mendoza', '78901234-5', '1996-04-05', '7789-0123', 'laura.mendoza@gmail.com', 'Ilopango'),
+('Laura', 'Mendoza', '78901234-0', '1996-04-05', '7789-0123', 'laura.mendoza@gmail.com', 'Ilopango'),
 ('Daniel', 'Rivera', '89012345-6', '2000-08-19', '7890-1234', 'daniel.rivera@gmail.com', 'Colón'),
-('Gabriela', 'Morales', '90123456-7', '1993-10-27', '7901-2345', 'gabriela.morales@gmail.com', 'San Miguel');
+('Gabriela', 'Morales', '90123456-2', '1993-10-27', '7901-2345', 'gabriela.morales@gmail.com', 'San Miguel');
 
 -- ============================================================
 -- DATOS DE PRUEBA: 5 MÉDICOS
@@ -161,11 +161,11 @@ VALUES
 INSERT INTO medicos
 (nombres, apellidos, dui, telefono, correo, id_especialidad)
 VALUES
-('Roberto', 'Martínez', '11223344-5', '7011-2233', 'roberto.martinez@clinica.com', 1),
+('Roberto', 'Martínez', '11223344-0', '7011-2233', 'roberto.martinez@clinica.com', 1),
 ('Patricia', 'Gómez', '22334455-6', '7022-3344', 'patricia.gomez@clinica.com', 2),
-('Fernando', 'Hernández', '33445566-7', '7033-4455', 'fernando.hernandez@clinica.com', 3),
+('Fernando', 'Hernández', '33445566-2', '7033-4455', 'fernando.hernandez@clinica.com', 3),
 ('Claudia', 'López', '44556677-8', '7044-5566', 'claudia.lopez@clinica.com', 4),
-('Ricardo', 'Ramírez', '55667788-9', '7055-6677', 'ricardo.ramirez@clinica.com', 5);
+('Ricardo', 'Ramírez', '55667788-4', '7055-6677', 'ricardo.ramirez@clinica.com', 5);
 
 -- ============================================================
 -- DATOS DE PRUEBA: 12 CITAS (NUEVO - FASE 2)
