@@ -1,0 +1,1325 @@
+{
+  "info": {
+    "name": "Clinica DWF901 - API Pacientes y Medicos (Fase 3)",
+    "description": "Pruebas de los servicios REST de pacientes, medicos y especialidades.\n\nEjecutar en orden con el Collection Runner: las peticiones guardan los id creados en variables.\nRequiere la base cargada con clinicafinal.sql (los pacientes y medicos 1 tienen citas).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/clinica-citas/api"
+    },
+    {
+      "key": "idPaciente",
+      "value": ""
+    },
+    {
+      "key": "idMedico",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Pacientes",
+      "item": [
+        {
+          "name": "P01 Listar pacientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ]
+            },
+            "description": "Positivo. Devuelve PacienteResumen: DUI enmascarado y sin datos de contacto."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Devuelve un arreglo', () => pm.expect(pm.response.json()).to.be.an('array'));",
+                  "pm.test('El listado no expone datos de contacto ni DUI completo', () => { const p = pm.response.json()[0]; if (!p) return; pm.expect(p).to.not.have.any.keys('dui','telefono','correo','direccion'); pm.expect(p.duiParcial).to.match(/^\\*{5}/); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P02 Buscar pacientes por texto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes?buscar=mart",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ],
+              "query": [
+                {
+                  "key": "buscar",
+                  "value": "mart"
+                }
+              ]
+            },
+            "description": "Positivo. Coincidencia parcial en nombres, apellidos o DUI."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P03 Registrar paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ]
+            },
+            "description": "Positivo. 201 Created + Location. Guarda el id en la variable idPaciente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Andrea\",\n  \"apellidos\": \"Rivas Molina\",\n  \"dui\": \"04567890-3\",\n  \"fechaNacimiento\": \"14/02/2000\",\n  \"telefono\": \"7890-1234\",\n  \"correo\": \"andrea.rivas@gmail.com\",\n  \"direccion\": \"Colonia Escalón, San Salvador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('idPaciente', j.idPaciente);",
+                  "pm.test('Trae encabezado Location', () => pm.expect(pm.response.headers.get('Location')).to.include('/pacientes/' + j.idPaciente));",
+                  "pm.test('Correo normalizado a minusculas', () => pm.expect(j.correo).to.eql('andrea.rivas@gmail.com'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P04 Obtener paciente registrado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes/{{idPaciente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes",
+                "{{idPaciente}}"
+              ]
+            },
+            "description": "Positivo. Ficha completa."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Ficha completa con DUI', () => pm.expect(pm.response.json().dui).to.eql('04567890-3'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P05 Registrar DUI repetido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ]
+            },
+            "description": "Negativo. Mismo DUI que P03 -> 409 Conflicto.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Andrea\",\n  \"apellidos\": \"Rivas Molina\",\n  \"dui\": \"04567890-3\",\n  \"fechaNacimiento\": \"14/02/2000\",\n  \"telefono\": \"7890-1234\",\n  \"correo\": \"andrea.rivas@gmail.com\",\n  \"direccion\": \"Colonia Escalón, San Salvador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(409); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P06 Registrar con varios campos invalidos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ]
+            },
+            "description": "Negativo. Todos los errores en una sola respuesta, por campo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"\",\n  \"apellidos\": \"Pérez\",\n  \"dui\": \"1234567-8\",\n  \"fechaNacimiento\": \"31/02/2000\",\n  \"telefono\": \"5555\",\n  \"correo\": \"juan@h.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(400); pm.expect(j.mensaje).to.be.a('string'); });",
+                  "pm.test('Marca el campo dui', () => pm.expect(pm.response.json().campos).to.have.property('dui'));",
+                  "pm.test('Devuelve todos los errores juntos', () => pm.expect(Object.keys(pm.response.json().campos)).to.include.members(['nombres','dui','fechaNacimiento','telefono','correo']));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P07 DUI con digito verificador incorrecto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ]
+            },
+            "description": "Negativo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Andrea\",\n  \"apellidos\": \"Rivas Molina\",\n  \"dui\": \"04567890-4\",\n  \"fechaNacimiento\": \"14/02/2000\",\n  \"telefono\": \"7890-1234\",\n  \"correo\": \"andrea.rivas@gmail.com\",\n  \"direccion\": \"Colonia Escalón, San Salvador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(400); pm.expect(j.mensaje).to.be.a('string'); });",
+                  "pm.test('Marca el campo dui', () => pm.expect(pm.response.json().campos).to.have.property('dui'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P08 Fecha de nacimiento futura",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ]
+            },
+            "description": "Limite.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Andrea\",\n  \"apellidos\": \"Rivas Molina\",\n  \"dui\": \"03987654-3\",\n  \"fechaNacimiento\": \"01/01/2099\",\n  \"telefono\": \"7890-1234\",\n  \"correo\": \"andrea.rivas@gmail.com\",\n  \"direccion\": \"Colonia Escalón, San Salvador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(400); pm.expect(j.mensaje).to.be.a('string'); });",
+                  "pm.test('Marca el campo fechaNacimiento', () => pm.expect(pm.response.json().campos).to.have.property('fechaNacimiento'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P09 Fecha con mas de 120 anios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ]
+            },
+            "description": "Limite. Atrapa errores de digitacion del anio.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Andrea\",\n  \"apellidos\": \"Rivas Molina\",\n  \"dui\": \"03987654-3\",\n  \"fechaNacimiento\": \"01/01/1890\",\n  \"telefono\": \"7890-1234\",\n  \"correo\": \"andrea.rivas@gmail.com\",\n  \"direccion\": \"Colonia Escalón, San Salvador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(400); pm.expect(j.mensaje).to.be.a('string'); });",
+                  "pm.test('Marca el campo fechaNacimiento', () => pm.expect(pm.response.json().campos).to.have.property('fechaNacimiento'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P10 Nombres con 101 caracteres",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ]
+            },
+            "description": "Limite. La columna admite 100.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n  \"apellidos\": \"Rivas Molina\",\n  \"dui\": \"03987654-3\",\n  \"fechaNacimiento\": \"14/02/2000\",\n  \"telefono\": \"7890-1234\",\n  \"correo\": \"andrea.rivas@gmail.com\",\n  \"direccion\": \"Colonia Escalón, San Salvador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(400); pm.expect(j.mensaje).to.be.a('string'); });",
+                  "pm.test('Marca el campo nombres', () => pm.expect(pm.response.json().campos).to.have.property('nombres'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P11 JSON mal escrito",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ]
+            },
+            "description": "Negativo. Mensaje claro, sin el detalle interno de Jackson.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombres\": \"Ana\", }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(400); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P12 Cuerpo vacio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ]
+            },
+            "description": "Negativo.",
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(400); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P13 Content-Type incorrecto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes"
+              ]
+            },
+            "description": "Negativo. 415 en JSON, no la pagina HTML de Tomcat.",
+            "body": {
+              "mode": "raw",
+              "raw": "hola"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 415', () => pm.response.to.have.status(415));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(415); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P14 Actualizar paciente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes/{{idPaciente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes",
+                "{{idPaciente}}"
+              ]
+            },
+            "description": "Positivo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Andrea\",\n  \"apellidos\": \"Rivas Molina\",\n  \"dui\": \"04567890-3\",\n  \"fechaNacimiento\": \"14/02/2000\",\n  \"telefono\": \"6000-1111\",\n  \"correo\": \"andrea.rivas@gmail.com\",\n  \"direccion\": \"Santa Tecla\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Telefono actualizado', () => pm.expect(pm.response.json().telefono).to.eql('6000-1111'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P15 Obtener paciente inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes",
+                "999999"
+              ]
+            },
+            "description": "Negativo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(404); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P16 Id no numerico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes",
+                "abc"
+              ]
+            },
+            "description": "Negativo. La ruta exige numero."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(404); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P17 Eliminar paciente con citas",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes",
+                "1"
+              ]
+            },
+            "description": "Negativo. El paciente 1 del script tiene citas: se protege el historial."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(409); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P18 Eliminar paciente registrado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes/{{idPaciente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes",
+                "{{idPaciente}}"
+              ]
+            },
+            "description": "Positivo. 204 sin cuerpo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P19 Eliminar otra vez",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes/{{idPaciente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes",
+                "{{idPaciente}}"
+              ]
+            },
+            "description": "Negativo. Ya no existe."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(404); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P20 Metodo no permitido",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pacientes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pacientes",
+                "1"
+              ]
+            },
+            "description": "Negativo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"X\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 405', () => pm.response.to.have.status(405));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(405); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Medicos y especialidades",
+      "item": [
+        {
+          "name": "E01 Listar especialidades",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/especialidades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "especialidades"
+              ]
+            },
+            "description": "Positivo. Catalogo para el formulario de medicos."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Trae especialidades', () => pm.expect(pm.response.json().length).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M01 Listar medicos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos"
+              ]
+            },
+            "description": "Positivo. Sin DUI."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Ningun medico trae DUI', () => pm.response.json().forEach(m => pm.expect(m).to.not.have.property('dui')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M02 Filtrar por especialidad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/medicos?especialidad=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos"
+              ],
+              "query": [
+                {
+                  "key": "especialidad",
+                  "value": "2"
+                }
+              ]
+            },
+            "description": "Positivo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Todos son de la especialidad 2', () => pm.response.json().forEach(m => pm.expect(m.idEspecialidad).to.eql(2)));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M03 Filtro de especialidad no numerico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/medicos?especialidad=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos"
+              ],
+              "query": [
+                {
+                  "key": "especialidad",
+                  "value": "abc"
+                }
+              ]
+            },
+            "description": "Negativo. 400 con explicacion, no 404."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(400); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M04 Registrar medico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos"
+              ]
+            },
+            "description": "Positivo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Mario\",\n  \"apellidos\": \"Fuentes\",\n  \"dui\": \"05123456-3\",\n  \"idEspecialidad\": 2,\n  \"telefono\": \"2250-1100\",\n  \"correo\": \"mario.fuentes@clinica.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json(); pm.collectionVariables.set('idMedico', j.idMedico);",
+                  "pm.test('La respuesta no incluye el DUI', () => pm.expect(j).to.not.have.property('dui'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M05 Registrar DUI repetido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos"
+              ]
+            },
+            "description": "Negativo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Mario\",\n  \"apellidos\": \"Fuentes\",\n  \"dui\": \"05123456-3\",\n  \"idEspecialidad\": 2,\n  \"telefono\": \"2250-1100\",\n  \"correo\": \"mario.fuentes@clinica.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(409); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M06 Especialidad inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos"
+              ]
+            },
+            "description": "Negativo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Mario\",\n  \"apellidos\": \"Fuentes\",\n  \"dui\": \"03987654-3\",\n  \"idEspecialidad\": 999,\n  \"telefono\": \"2250-1100\",\n  \"correo\": \"mario.fuentes@clinica.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(400); pm.expect(j.mensaje).to.be.a('string'); });",
+                  "pm.test('Marca el campo idEspecialidad', () => pm.expect(pm.response.json().campos).to.have.property('idEspecialidad'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M07 idEspecialidad con tipo incorrecto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos"
+              ]
+            },
+            "description": "Negativo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Mario\",\n  \"apellidos\": \"Fuentes\",\n  \"dui\": \"05123456-3\",\n  \"idEspecialidad\": \"pediatria\",\n  \"telefono\": \"2250-1100\",\n  \"correo\": \"mario.fuentes@clinica.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(400); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M08 Registrar sin DUI",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos"
+              ]
+            },
+            "description": "Negativo. Al registrar el DUI es obligatorio.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Mario\",\n  \"apellidos\": \"Fuentes\",\n  \"idEspecialidad\": 2,\n  \"telefono\": \"2250-1100\",\n  \"correo\": \"mario.fuentes@clinica.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(400); pm.expect(j.mensaje).to.be.a('string'); });",
+                  "pm.test('Marca el campo dui', () => pm.expect(pm.response.json().campos).to.have.property('dui'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M09 Actualizar sin enviar DUI",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medicos/{{idMedico}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos",
+                "{{idMedico}}"
+              ]
+            },
+            "description": "Positivo. Sin DUI se conserva el guardado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Mario\",\n  \"apellidos\": \"Fuentes\",\n  \"idEspecialidad\": 3,\n  \"telefono\": \"2250-1100\",\n  \"correo\": \"mario.fuentes@clinica.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Cambio de especialidad', () => pm.expect(pm.response.json().idEspecialidad).to.eql(3));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M10 Obtener medico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/medicos/{{idMedico}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos",
+                "{{idMedico}}"
+              ]
+            },
+            "description": "Positivo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M11 Medico inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/medicos/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos",
+                "999999"
+              ]
+            },
+            "description": "Negativo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(404); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M12 Eliminar medico con citas",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/medicos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos",
+                "1"
+              ]
+            },
+            "description": "Negativo. El medico 1 del script tiene citas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(409); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M13 Eliminar medico registrado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/medicos/{{idMedico}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medicos",
+                "{{idMedico}}"
+              ]
+            },
+            "description": "Positivo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "X01 Ruta inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/no-existe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "no-existe"
+              ]
+            },
+            "description": "Negativo. 404 en formato JSON."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Formato ErrorRespuesta', () => { const j = pm.response.json(); pm.expect(j.codigo).to.eql(404); pm.expect(j.mensaje).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
