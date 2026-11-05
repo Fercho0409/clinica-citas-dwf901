@@ -58,12 +58,15 @@
         <servlet-name>Jersey REST Service</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
-            <param-name>jersey.config.server.provider.packages</param-name>
-            <!-- Paquetes donde Jersey busca recursos (@Path) y proveedores (@Provider).
-                 La busqueda incluye los subpaquetes: sv.edu.udb.clinica.api cubre
-                 api.recurso (endpoints), api.error (manejo de errores) y api.util (CORS).
-                 Se conserva controller por si algun recurso quedo alli. -->
-            <param-value>sv.edu.udb.clinica.api,sv.edu.udb.clinica.controller</param-value>
+            <!--
+                Se le entrega a Jersey la clase que enumera los recursos,
+                en lugar de pedirle que los busque sola dentro de un paquete.
+                El escaneo automatico falla con Java 21:
+                "Unsupported class file major version 65".
+                Al agregar un recurso nuevo hay que anotarlo en ApiApplication.
+            -->
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>sv.edu.udb.clinica.api.ApiApplication</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
