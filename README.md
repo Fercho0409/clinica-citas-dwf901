@@ -274,6 +274,36 @@ texto, médico y estado.
 - No se permite agendar en una fecha u hora ya transcurrida.
 - Cancelar **no** elimina la cita: cambia su estado y conserva el historial.
 
+**Agenda del día** — pantalla propia que muestra las citas de un médico en una fecha,
+con botones para moverse al día anterior o siguiente y un recuento por estado. Es la
+vista que pedía HU-14.
+
+**Servicios REST de citas** — las mismas operaciones de las pantallas, publicadas
+para que las consuma un cliente externo.
+
+| Operación | Ruta | Resultado |
+|-----------|------|-----------|
+| Listar | `GET /api/citas` | 200. Admite filtrar por `idPaciente`, `idMedico`, `fecha` y `estado` |
+| Consultar una | `GET /api/citas/{id}` | 200, o 404 si no existe |
+| Agenda de un médico | `GET /api/citas/agenda?idMedico=&fecha=` | 200 |
+| Agendar | `POST /api/citas` | 201 con la dirección de la cita creada |
+| Reprogramar | `PUT /api/citas/{id}` | 200. Si cambia la fecha o la hora, el estado pasa a `REPROGRAMADA` |
+| Cancelar | `PATCH /api/citas/{id}/cancelar` | 200 |
+| Marcar atendida | `PATCH /api/citas/{id}/atender` | 200 |
+
+Los errores salen siempre con la misma forma: un código, un título y un mensaje que
+puede mostrarse tal cual al usuario. Se responde 400 cuando los datos vienen mal
+escritos —con el detalle de cada campo—, 404 cuando no existe lo que se pide y 409
+cuando la petición está bien escrita pero choca con una regla de negocio, como
+agendar en una hora que el médico ya tiene ocupada.
+
+Las reglas son las mismas que aplican las pantallas y el acceso a datos es el mismo
+`CitaDAO`: la API no duplica la lógica, solo la expone.
+
+**Registro de los servicios** — `ApiApplication` enumera las clases que componen la
+API. Un recurso nuevo debe agregarse a esa lista o no queda publicado, aunque tenga
+su `@Path`.
+
 **Validadores**
 
 | Validador | Comprueba |
@@ -387,6 +417,19 @@ archivo `my.ini`.
 
 ---
 
+### Servicios REST
+
+**Error 500 al abrir cualquier ruta `/api`, con el mensaje `Unsupported class file
+major version 65`.** Jersey 2.35 trae una copia interna de ASM que solo entiende
+clases compiladas hasta Java 17, y el proyecto compila con Java 21. El `web.xml` ya
+no le pide buscar los recursos por su cuenta: se los entrega enumerados en
+`ApiApplication`.
+
+**Un endpoint responde 404 aunque la clase existe y tiene su `@Path`.** Falta
+agregarla a `ApiApplication`.
+
+---
+
 ## Deuda técnica
 
 Pendientes conocidos. El detalle completo está en `docs/product-backlog.md`.
@@ -404,8 +447,11 @@ Pendientes conocidos. El detalle completo está en `docs/product-backlog.md`.
   `PacienteServlet`, `PruebaConexionServlet` y `PruebaJPAServlet`.
 - Los DUI del script de datos de prueba no superan la validación del dígito
   verificador, por lo que esos registros no pueden reeditarse sin corregir el documento.
-- HU-14 (agenda del día del médico) tiene la consulta implementada en `CitaDAO` pero
-  no cuenta con pantalla.
+- Las reglas del agendamiento están escritas dos veces: en `CitaBean`, para las
+  pantallas, y en `CitaRecurso`, para la API. Un cambio de regla hay que hacerlo en
+  los dos lados.
+- `ApiApplication` lleva la lista de recursos a mano. Es lo que permite arrancar con
+  Java 21, pero obliga a recordar ese paso al agregar un servicio nuevo.
 
 ---
 
@@ -438,7 +484,20 @@ Septiembre de 2026 · 20% de la nota
 - [x] Validadores, convertidores y operaciones AJAX
 - [x] Control de acceso mediante inicio de sesión
 - [x] PDF de evidencias
-- [ ] HU-14: pantalla de agenda diaria del médico
+- [x] HU-14: pantalla de agenda diaria del médico
+
+**Fase 3 — Servicios REST e Integración de Clientes** · En curso
+25% de la nota
+
+- [x] Dependencias de Jersey y configuración del servlet de la API
+- [x] Servicios REST de pacientes, médicos y especialidades
+- [x] Servicios REST de citas y agenda diaria
+- [x] Objetos de transferencia para no exponer las entidades
+- [x] Manejo centralizado de errores con códigos HTTP
+- [x] Pantalla de agenda diaria del médico (HU-14)
+- [x] Permisos de origen cruzado para el cliente externo
+- [ ] Cliente web en React consumiendo la API
+- [ ] PDF de evidencias
 
 ### Alcance
 
@@ -446,3 +505,5 @@ La Fase 1 cubrió los módulos de **pacientes** y **médicos** con JDBC.
 La Fase 2 incorpora el módulo de **citas**, migra la persistencia a JPA, implementa
 la interfaz con JSF sobre la plantilla AdminLTE —solicitada durante la defensa
 anterior— y agrega control de acceso.
+La Fase 3 publica esas operaciones como servicios REST y agrega un cliente web
+independiente que las consume.

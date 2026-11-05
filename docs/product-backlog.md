@@ -133,21 +133,64 @@ no se construyó la pantalla que la invoca. La historia queda abierta para la Fa
 | HT-22 | Implementar el inicio de sesión y el filtro de control de acceso | Integrante 3 | Completada |
 | HT-23 | Fijar las versiones compatibles de JSF, PrimeFaces e Hibernate para Tomcat 9 | Integrante 5 | Completada |
 | HT-24 | Integrar el trabajo de las ramas del equipo en la rama principal | Integrante 5 | Completada |
-| HT-25 | Construir la pantalla de agenda diaria del médico (HU-14) | Por asignar | Pendiente |
+| HT-25 | Construir la pantalla de agenda diaria del médico (HU-14) | Integrante 5 | Completada |
+
+---
+
+## Fase 3 — Sprint III: Servicios REST e Integración de Clientes
+
+25% de la nota.
+
+### Historias de usuario
+
+| ID | Historia de usuario | Prioridad | Estado |
+|----|---------------------|-----------|--------|
+| HU-14 | Como **médico**, quiero consultar mi agenda del día para preparar mis consultas | Alta | Completada |
+| HU-16 | Como **paciente**, quiero consultar mis próximas citas desde un portal externo | Alta | En curso |
+| HU-17 | Como **sistema externo**, quiero consumir la API de disponibilidad de médicos | Media | Completada |
+| HU-21 | Como **sistema externo**, quiero agendar, reprogramar y cancelar citas mediante la API | Alta | Completada |
+| HU-22 | Como **consumidor de la API**, quiero recibir los errores con un formato uniforme y un mensaje entendible | Alta | Completada |
+
+### Tareas técnicas
+
+| ID | Tarea | Responsable | Estado |
+|----|-------|-------------|--------|
+| HT-26 | Incorporar las dependencias de Jersey y configurar el servlet de la API | Por confirmar | Completada |
+| HT-27 | Construir los servicios REST de pacientes | Por confirmar | Completada |
+| HT-28 | Construir los servicios REST de médicos y especialidades | Por confirmar | Completada |
+| HT-29 | Construir los servicios REST de citas, incluida la agenda diaria | Integrante 5 | Completada |
+| HT-30 | Definir los objetos de transferencia para no exponer las entidades | Integrante 5 | Completada |
+| HT-31 | Centralizar el manejo de errores y los códigos HTTP de respuesta | Por confirmar | Completada |
+| HT-32 | Habilitar los permisos de origen cruzado para el cliente externo | Por confirmar | Completada |
+| HT-33 | Permitir el paso libre de las rutas de la API en el filtro de control de acceso | Por confirmar | Completada |
+| HT-34 | Registrar los recursos de la API de forma explícita para que arranque con Java 21 | Integrante 5 | Completada |
+| HT-35 | Construir el cliente web en React que consume la API | Por confirmar | En curso |
+| HT-36 | Probar los servicios de citas y documentar las respuestas obtenidas | Integrante 5 | Completada |
+| HT-37 | Elaborar el PDF de evidencias de la fase | Integrante 5 | Pendiente |
+
+### Pruebas de los servicios de citas
+
+Resultados obtenidos el 5 de noviembre de 2026.
+
+| Prueba | Esperado | Obtenido |
+|--------|----------|----------|
+| Consultar una cita existente | 200 | 200 |
+| Agenda de un médico en una fecha | 200 | 200 |
+| Agendar una cita válida | 201 | 201 |
+| Repetir el mismo agendamiento | 409 | 409 |
+| Enviar fecha y hora imposibles | 400 | 400 |
+| Consultar una cita inexistente | 404 | 404 |
+| Cancelar una cita vigente | 200 | 200 |
+
+El 409 responde `El médico Roberto Martínez ya tiene una cita agendada el 05/11/2026
+a las 15:00.` y el 400 señala cada campo por separado. Es la misma regla que aplican
+las pantallas, comprobada ahora por la vía de la API.
 
 ---
 
 ## Fases posteriores
 
-Historias identificadas, fuera del alcance del Sprint II. Se detallarán al inicio de cada fase.
-
-### Fase 3 — Servicios REST e integración de clientes
-
-| ID | Historia de usuario | Prioridad |
-|----|---------------------|-----------|
-| HU-14 | Como **médico**, quiero consultar mi agenda del día para preparar mis consultas | Alta |
-| HU-16 | Como **paciente**, quiero consultar mis próximas citas desde un portal externo | Alta |
-| HU-17 | Como **sistema externo**, quiero consumir la API de disponibilidad de médicos | Media |
+Historias identificadas, fuera del alcance de los sprints cerrados. Se detallarán al inicio de cada fase.
 
 ### Fase 4 — Spring, calidad y liberación
 
@@ -227,6 +270,16 @@ Historias identificadas, fuera del alcance del Sprint II. Se detallarán al inic
 
 ---
 
+### Fase 3 — Servicios REST
+
+| # | Incidencia | Estado | Resolución |
+|---|-----------|--------|------------|
+| INC-31 | Toda ruta `/api` respondía 500 con `Unsupported class file major version 65` | Resuelta | Jersey 2.35 localiza los recursos leyendo las clases compiladas con una copia interna de ASM que solo entiende hasta Java 17, y el proyecto compila con Java 21. Se dejó de usar esa búsqueda y los recursos se enumeran en `ApiApplication` (HT-34). Afectaba a todo el equipo, no a una máquina en particular |
+| INC-32 | La agenda diaria no mostraba las citas canceladas ni las atendidas | Resuelta | La consulta de `CitaDAO` filtraba por los estados que ocupan horario, lo cual corresponde a la comprobación de disponibilidad pero no a una agenda. Se retiró el filtro de esa consulta y se conservó en la de disponibilidad |
+| INC-33 | El filtro de control de acceso redirigía al login las peticiones a la API | Resuelta | Se agregó al filtro el paso libre para las rutas `/api` |
+
+---
+
 ## Deuda técnica
 
 | # | Descripción | Prioridad | Estado |
@@ -245,9 +298,12 @@ Historias identificadas, fuera del alcance del Sprint II. Se detallarán al inic
 | DT-12 | Permanece código de la Fase 1 que ya nadie invoca: `ConexionBD`, `MedicoServlet` y `PacienteServlet` | Baja | Pendiente |
 | DT-13 | Los números de DUI del script de datos de prueba no superan la validación del dígito verificador, por lo que esos registros no pueden reeditarse sin corregir antes el documento | Media | Pendiente |
 | DT-14 | `UsuarioDAO` construye su propio `EntityManagerFactory` en lugar de usar `JPAUtil`, duplicando una operación costosa | Media | Pendiente |
+| DT-15 | Las reglas del agendamiento están implementadas dos veces: en `CitaBean` para las pantallas y en `CitaRecurso` para la API | Media | Pendiente — convendría trasladarlas a una capa de servicio común |
+| DT-16 | `ApiApplication` enumera los recursos a mano. Es lo que permite arrancar con Java 21, pero obliga a recordar ese paso al agregar un servicio | Baja | Aceptada — se resolvería actualizando Jersey, lo cual exige migrar a `jakarta` y cambiar de servidor |
 
-### Prioridades para la Fase 3
+### Prioridades para la Fase 4
 
-El orden sugerido de atención es DT-07, DT-08 y DT-09, por ser los que afectan la
-seguridad y la integridad de los datos. Los demás son de orden y limpieza, y pueden
-resolverse junto con el trabajo regular de la fase.
+El orden sugerido de atención sigue siendo DT-07, DT-08 y DT-09, por ser los que
+afectan la seguridad y la integridad de los datos; los tres están contemplados en el
+alcance de la Fase 4. DT-15 conviene resolverlo antes de que las reglas de negocio
+sigan creciendo por separado. Los demás son de orden y limpieza.
