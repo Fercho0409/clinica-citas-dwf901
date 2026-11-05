@@ -58,6 +58,67 @@ public class MedicoDAO {
         }
     }
 
+    /**
+     * Busqueda combinada para la API: GET /api/medicos?buscar=&especialidad=
+     * Cualquiera de los dos filtros puede venir en null.
+     */
+    public List<Medico> buscar(String texto, Integer idEspecialidad) {
+        StringBuilder jpql = new StringBuilder(
+                "SELECT m FROM Medico m JOIN FETCH m.especialidad e WHERE 1 = 1");
+        if (texto != null) {
+            jpql.append(" AND (LOWER(m.nombres) LIKE :t OR LOWER(m.apellidos) LIKE :t)");
+        }
+        if (idEspecialidad != null) {
+            jpql.append(" AND e.idEspecialidad = :esp");
+        }
+        jpql.append(" ORDER BY m.apellidos, m.nombres");
+
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            javax.persistence.TypedQuery<Medico> consulta =
+                    em.createQuery(jpql.toString(), Medico.class);
+            if (texto != null) {
+                consulta.setParameter("t", "%" + texto.trim().toLowerCase() + "%");
+            }
+            if (idEspecialidad != null) {
+                consulta.setParameter("esp", idEspecialidad);
+            }
+            return consulta.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /** Cuantas citas tiene el medico, en cualquier estado. Ver PacienteDAO. */
+    public long contarCitas(int idMedico) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT COUNT(c) FROM Cita c WHERE c.medico.idMedico = :id",
+                    Long.class)
+                    .setParameter("id", idMedico)
+                    .getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Busca una especialidad por su numero.
+     *
+     * Se agrega aqui y no se usa EspecialidadDAO porque aquel recibe
+     * Long (la columna es INT y Hibernate rechaza el tipo) y crea su
+     * propia fabrica de EntityManager en lugar de usar JPAUtil.
+     */
+    public Especialidad buscarEspecialidad(int idEspecialidad) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.find(Especialidad.class, idEspecialidad);
+        } finally {
+            em.close();
+        }
+    }
+
     public List<Especialidad> listarEspecialidades() {
         EntityManager em = JPAUtil.getEntityManager();
         try {

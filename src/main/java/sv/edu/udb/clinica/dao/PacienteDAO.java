@@ -61,6 +61,45 @@ public class PacienteDAO {
         }
     }
 
+    /**
+     * Busqueda por nombre, apellido o DUI (coincidencia parcial, sin
+     * distinguir mayusculas). La usa la API: GET /api/pacientes?buscar=
+     */
+    public List<Paciente> buscar(String texto) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT p FROM Paciente p "
+                    + "WHERE LOWER(p.nombres) LIKE :t OR LOWER(p.apellidos) LIKE :t "
+                    + "OR p.dui LIKE :t "
+                    + "ORDER BY p.apellidos, p.nombres", Paciente.class)
+                    .setParameter("t", "%" + texto.trim().toLowerCase() + "%")
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Cuantas citas tiene registradas el paciente, en cualquier estado.
+     *
+     * La llave foranea de citas impide borrar un paciente con historial.
+     * Se consulta antes de eliminar para responder con un mensaje claro
+     * en lugar de dejar que la base rechace la operacion.
+     */
+    public long contarCitas(int idPaciente) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT COUNT(c) FROM Cita c WHERE c.paciente.idPaciente = :id",
+                    Long.class)
+                    .setParameter("id", idPaciente)
+                    .getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
     public boolean insertar(Paciente paciente) {
         EntityManager em = JPAUtil.getEntityManager();
         try {

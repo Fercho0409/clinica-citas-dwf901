@@ -1,6 +1,8 @@
 package sv.edu.udb.clinica.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Respuesta uniforme para cuando algo sale mal.
@@ -20,6 +22,7 @@ import java.io.Serializable;
  * se pone aqui el detalle tecnico de una excepcion: eso va al
  * registro del servidor, no hacia afuera.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorRespuesta implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,6 +30,16 @@ public class ErrorRespuesta implements Serializable {
     private int codigo;
     private String error;
     private String mensaje;
+
+    /**
+     * Errores por campo, solo cuando falla la validacion de un
+     * formulario: { "dui": "El formato del DUI debe ser 00000000-0." }
+     *
+     * Permite que el cliente marque cada campo del formulario con su
+     * propio mensaje. Cuando no aplica queda en null y no aparece en
+     * el JSON.
+     */
+    private Map<String, String> campos;
 
     /** Constructor vacio: lo necesita el convertidor a JSON. */
     public ErrorRespuesta() {
@@ -43,6 +56,16 @@ public class ErrorRespuesta implements Serializable {
     /** 400: lo que mando el cliente esta mal formado o incompleto. */
     public static ErrorRespuesta solicitudInvalida(String mensaje) {
         return new ErrorRespuesta(400, "Solicitud invalida", mensaje);
+    }
+
+    /** 400 con el detalle de cada campo que no paso la validacion. */
+    public static ErrorRespuesta validacion(Map<String, String> campos) {
+        String mensaje = campos.size() == 1
+                ? "Hay 1 campo con errores."
+                : "Hay " + campos.size() + " campos con errores.";
+        ErrorRespuesta r = solicitudInvalida(mensaje);
+        r.campos = campos;
+        return r;
     }
 
     /** 404: se pidio algo que no existe. */
@@ -88,5 +111,13 @@ public class ErrorRespuesta implements Serializable {
 
     public void setMensaje(String mensaje) {
         this.mensaje = mensaje;
+    }
+
+    public Map<String, String> getCampos() {
+        return campos;
+    }
+
+    public void setCampos(Map<String, String> campos) {
+        this.campos = campos;
     }
 }
