@@ -26,7 +26,7 @@ public class FiltroCors implements ContainerResponseFilter {
             throws IOException {
         respuesta.getHeaders().putSingle("Access-Control-Allow-Origin", "*");
         respuesta.getHeaders().putSingle("Access-Control-Allow-Methods",
-                "GET, POST, PUT, DELETE, OPTIONS");
+                "GET, POST, PUT, PATCH, DELETE, OPTIONS");
         respuesta.getHeaders().putSingle("Access-Control-Allow-Headers",
                 "Content-Type, Accept, Authorization");
         respuesta.getHeaders().putSingle("Access-Control-Expose-Headers", "Location");
