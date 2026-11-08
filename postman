@@ -1,0 +1,392 @@
+{
+  "info": {
+    "_postman_id": "33c91668-37c5-40cb-b103-22d67391d24c",
+    "name": "API CLINICA",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "59378962",
+    "_collection_link": "https://go.postman.co/collection/59378962-33c91668-37c5-40cb-b103-22d67391d24c?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Pacientes",
+      "item": [
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Medicos",
+      "item": [
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "New Request",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "accion",
+                      "value": "nuevo"
+                    },
+                    {
+                      "key": "nombres",
+                      "value": "Carlos Eduardo"
+                    },
+                    {
+                      "key": "apellidos",
+                      "value": "Ramírez"
+                    },
+                    {
+                      "key": "dui",
+                      "value": "01234567-8"
+                    },
+                    {
+                      "key": "telefono",
+                      "value": "7890-1234"
+                    },
+                    {
+                      "key": "correo",
+                      "value": "carlos.ramirez@email.com"
+                    },
+                    {
+                      "key": "idEspecialidad",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "http://localhost:8080/clinica-citas/medicos",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "clinica-citas",
+                    "medicos"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "html",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/html;charset=UTF-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "4167"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 05:02:48 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=20"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "<?xml version='1.0' encoding='UTF-8' ?>\n<!DOCTYPE html>\n<html xmlns=\"http://www.w3.org/1999/xhtml\"><head id=\"j_idt2\"><link type=\"text/css\" rel=\"stylesheet\" href=\"/clinica-citas/javax.faces.resource/fa/font-awesome.css.xhtml?ln=primefaces&amp;v=8.0\" /><link type=\"text/css\" rel=\"stylesheet\" href=\"/clinica-citas/javax.faces.resource/components.css.xhtml?ln=primefaces&amp;v=8.0\" /><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/jquery/jquery.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/core.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/components.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/jquery/jquery-plugins.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\">if(window.PrimeFaces){PrimeFaces.settings.locale='es_SV';PrimeFaces.settings.projectStage='Development';}</script>\n        <title>Login - Clínica UDB</title>\n        <link rel=\"stylesheet\" type=\"text/css\" href=\"/clinica-citas/resources/css/adminlte.min.css\" /></head><body class=\"hold-transition login-page\" style=\"background-color: #e9ecef; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\">\n        <div class=\"login-box\" style=\"width: 360px;\">\n            <div class=\"card card-outline card-primary shadow\">\n                <div class=\"card-header text-center\">\n                    <h2 class=\"h1\" style=\"font-weight: bold; color: #007bff;\">Clínica UDB</h2>\n                </div>\n                <div class=\"card-body login-card-body\">\n                    <p class=\"login-box-msg\" style=\"margin-bottom: 15px; color: #6c757d; text-align: center;\">Ingrese sus credenciales para acceder</p>\n<form id=\"loginForm\" name=\"loginForm\" method=\"post\" action=\"/clinica-citas/login.xhtml\" enctype=\"application/x-www-form-urlencoded\">\n<input type=\"hidden\" name=\"loginForm\" value=\"loginForm\" />\n<div id=\"loginForm:messages\" class=\"ui-messages ui-widget\" aria-live=\"polite\"></div>\n\n                        <div class=\"input-group mb-3\" style=\"margin-bottom: 15px;\"><input id=\"loginForm:usuario\" name=\"loginForm:usuario\" type=\"text\" style=\"width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;\" class=\"ui-inputfield ui-inputtext ui-widget ui-state-default ui-corner-all\" aria-required=\"true\" placeholder=\"Usuario\" /><script id=\"loginForm:usuario_s\" type=\"text/javascript\">$(function(){PrimeFaces.cw(\"InputText\",\"widget_loginForm_usuario\",{id:\"loginForm:usuario\",maxlength:-2147483648});});</script>\n                        </div>\n\n                        <div class=\"input-group mb-3\" style=\"margin-bottom: 20px;\"><input id=\"loginForm:clave\" name=\"loginForm:clave\" type=\"password\" class=\"ui-inputfield ui-password ui-widget ui-state-default ui-corner-all\" style=\"width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;\" aria-required=\"true\" placeholder=\"Contraseña\" /><script id=\"loginForm:clave_s\" type=\"text/javascript\">$(function(){PrimeFaces.cw(\"Password\",\"widget_loginForm_clave\",{id:\"loginForm:clave\"});});</script>\n                        </div>\n\n                        <div class=\"row\">\n                            <div class=\"col-12\"><button id=\"loginForm:j_idt9\" name=\"loginForm:j_idt9\" class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only\" onclick=\"\" style=\"width: 100%; background-color: #007bff; border: none; color: white; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;\" type=\"submit\"><span class=\"ui-button-text ui-c\">Iniciar Sesión</span></button><script id=\"loginForm:j_idt9_s\" type=\"text/javascript\">$(function(){PrimeFaces.cw(\"CommandButton\",\"widget_loginForm_j_idt9\",{id:\"loginForm:j_idt9\"});});</script>\n                            </div>\n                        </div><input type=\"hidden\" name=\"javax.faces.ViewState\" id=\"j_id1:javax.faces.ViewState:0\" value=\"-6517549640729060064:-1205027639372071882\" autocomplete=\"off\" />\n</form>\n                </div>\n            </div>\n        </div></body>\n</html>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CITAS",
+      "item": [
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "New Request",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "accion",
+                      "value": "guardar"
+                    },
+                    {
+                      "key": "idPaciente",
+                      "value": "1"
+                    },
+                    {
+                      "key": "idMedico",
+                      "value": "1"
+                    },
+                    {
+                      "key": "fecha",
+                      "value": "2026-11-05"
+                    },
+                    {
+                      "key": "hora",
+                      "value": "10:00"
+                    },
+                    {
+                      "key": "motivo",
+                      "value": "Control general"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "http://localhost:8080/clinica-citas/citas",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "clinica-citas",
+                    "citas"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "html",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/html;charset=UTF-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "4167"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 05:06:08 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=20"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "<?xml version='1.0' encoding='UTF-8' ?>\n<!DOCTYPE html>\n<html xmlns=\"http://www.w3.org/1999/xhtml\"><head id=\"j_idt2\"><link type=\"text/css\" rel=\"stylesheet\" href=\"/clinica-citas/javax.faces.resource/fa/font-awesome.css.xhtml?ln=primefaces&amp;v=8.0\" /><link type=\"text/css\" rel=\"stylesheet\" href=\"/clinica-citas/javax.faces.resource/components.css.xhtml?ln=primefaces&amp;v=8.0\" /><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/jquery/jquery.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/core.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/components.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/jquery/jquery-plugins.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\">if(window.PrimeFaces){PrimeFaces.settings.locale='es_SV';PrimeFaces.settings.projectStage='Development';}</script>\n        <title>Login - Clínica UDB</title>\n        <link rel=\"stylesheet\" type=\"text/css\" href=\"/clinica-citas/resources/css/adminlte.min.css\" /></head><body class=\"hold-transition login-page\" style=\"background-color: #e9ecef; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\">\n        <div class=\"login-box\" style=\"width: 360px;\">\n            <div class=\"card card-outline card-primary shadow\">\n                <div class=\"card-header text-center\">\n                    <h2 class=\"h1\" style=\"font-weight: bold; color: #007bff;\">Clínica UDB</h2>\n                </div>\n                <div class=\"card-body login-card-body\">\n                    <p class=\"login-box-msg\" style=\"margin-bottom: 15px; color: #6c757d; text-align: center;\">Ingrese sus credenciales para acceder</p>\n<form id=\"loginForm\" name=\"loginForm\" method=\"post\" action=\"/clinica-citas/login.xhtml\" enctype=\"application/x-www-form-urlencoded\">\n<input type=\"hidden\" name=\"loginForm\" value=\"loginForm\" />\n<div id=\"loginForm:messages\" class=\"ui-messages ui-widget\" aria-live=\"polite\"></div>\n\n                        <div class=\"input-group mb-3\" style=\"margin-bottom: 15px;\"><input id=\"loginForm:usuario\" name=\"loginForm:usuario\" type=\"text\" style=\"width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;\" class=\"ui-inputfield ui-inputtext ui-widget ui-state-default ui-corner-all\" aria-required=\"true\" placeholder=\"Usuario\" /><script id=\"loginForm:usuario_s\" type=\"text/javascript\">$(function(){PrimeFaces.cw(\"InputText\",\"widget_loginForm_usuario\",{id:\"loginForm:usuario\",maxlength:-2147483648});});</script>\n                        </div>\n\n                        <div class=\"input-group mb-3\" style=\"margin-bottom: 20px;\"><input id=\"loginForm:clave\" name=\"loginForm:clave\" type=\"password\" class=\"ui-inputfield ui-password ui-widget ui-state-default ui-corner-all\" style=\"width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;\" aria-required=\"true\" placeholder=\"Contraseña\" /><script id=\"loginForm:clave_s\" type=\"text/javascript\">$(function(){PrimeFaces.cw(\"Password\",\"widget_loginForm_clave\",{id:\"loginForm:clave\"});});</script>\n                        </div>\n\n                        <div class=\"row\">\n                            <div class=\"col-12\"><button id=\"loginForm:j_idt9\" name=\"loginForm:j_idt9\" class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only\" onclick=\"\" style=\"width: 100%; background-color: #007bff; border: none; color: white; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;\" type=\"submit\"><span class=\"ui-button-text ui-c\">Iniciar Sesión</span></button><script id=\"loginForm:j_idt9_s\" type=\"text/javascript\">$(function(){PrimeFaces.cw(\"CommandButton\",\"widget_loginForm_j_idt9\",{id:\"loginForm:j_idt9\"});});</script>\n                            </div>\n                        </div><input type=\"hidden\" name=\"javax.faces.ViewState\" id=\"j_id1:javax.faces.ViewState:0\" value=\"-6339375963704226569:-7366391625838148145\" autocomplete=\"off\" />\n</form>\n                </div>\n            </div>\n        </div></body>\n</html>"
+            },
+            {
+              "name": "New Request",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "accion",
+                      "value": "guardar"
+                    },
+                    {
+                      "key": "idPaciente",
+                      "value": "1"
+                    },
+                    {
+                      "key": "idMedico",
+                      "value": "1"
+                    },
+                    {
+                      "key": "fecha",
+                      "value": "2026-11-05"
+                    },
+                    {
+                      "key": "hora",
+                      "value": "10:00"
+                    },
+                    {
+                      "key": "motivo",
+                      "value": "Control general"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "http://localhost:8080/clinica-citas/citas",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "clinica-citas",
+                    "citas"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "html",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/html;charset=UTF-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "4167"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 05:06:08 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=20"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "<?xml version='1.0' encoding='UTF-8' ?>\n<!DOCTYPE html>\n<html xmlns=\"http://www.w3.org/1999/xhtml\"><head id=\"j_idt2\"><link type=\"text/css\" rel=\"stylesheet\" href=\"/clinica-citas/javax.faces.resource/fa/font-awesome.css.xhtml?ln=primefaces&amp;v=8.0\" /><link type=\"text/css\" rel=\"stylesheet\" href=\"/clinica-citas/javax.faces.resource/components.css.xhtml?ln=primefaces&amp;v=8.0\" /><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/jquery/jquery.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/core.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/components.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\" src=\"/clinica-citas/javax.faces.resource/jquery/jquery-plugins.js.xhtml?ln=primefaces&amp;v=8.0\"></script><script type=\"text/javascript\">if(window.PrimeFaces){PrimeFaces.settings.locale='es_SV';PrimeFaces.settings.projectStage='Development';}</script>\n        <title>Login - Clínica UDB</title>\n        <link rel=\"stylesheet\" type=\"text/css\" href=\"/clinica-citas/resources/css/adminlte.min.css\" /></head><body class=\"hold-transition login-page\" style=\"background-color: #e9ecef; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\">\n        <div class=\"login-box\" style=\"width: 360px;\">\n            <div class=\"card card-outline card-primary shadow\">\n                <div class=\"card-header text-center\">\n                    <h2 class=\"h1\" style=\"font-weight: bold; color: #007bff;\">Clínica UDB</h2>\n                </div>\n                <div class=\"card-body login-card-body\">\n                    <p class=\"login-box-msg\" style=\"margin-bottom: 15px; color: #6c757d; text-align: center;\">Ingrese sus credenciales para acceder</p>\n<form id=\"loginForm\" name=\"loginForm\" method=\"post\" action=\"/clinica-citas/login.xhtml\" enctype=\"application/x-www-form-urlencoded\">\n<input type=\"hidden\" name=\"loginForm\" value=\"loginForm\" />\n<div id=\"loginForm:messages\" class=\"ui-messages ui-widget\" aria-live=\"polite\"></div>\n\n                        <div class=\"input-group mb-3\" style=\"margin-bottom: 15px;\"><input id=\"loginForm:usuario\" name=\"loginForm:usuario\" type=\"text\" style=\"width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;\" class=\"ui-inputfield ui-inputtext ui-widget ui-state-default ui-corner-all\" aria-required=\"true\" placeholder=\"Usuario\" /><script id=\"loginForm:usuario_s\" type=\"text/javascript\">$(function(){PrimeFaces.cw(\"InputText\",\"widget_loginForm_usuario\",{id:\"loginForm:usuario\",maxlength:-2147483648});});</script>\n                        </div>\n\n                        <div class=\"input-group mb-3\" style=\"margin-bottom: 20px;\"><input id=\"loginForm:clave\" name=\"loginForm:clave\" type=\"password\" class=\"ui-inputfield ui-password ui-widget ui-state-default ui-corner-all\" style=\"width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;\" aria-required=\"true\" placeholder=\"Contraseña\" /><script id=\"loginForm:clave_s\" type=\"text/javascript\">$(function(){PrimeFaces.cw(\"Password\",\"widget_loginForm_clave\",{id:\"loginForm:clave\"});});</script>\n                        </div>\n\n                        <div class=\"row\">\n                            <div class=\"col-12\"><button id=\"loginForm:j_idt9\" name=\"loginForm:j_idt9\" class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only\" onclick=\"\" style=\"width: 100%; background-color: #007bff; border: none; color: white; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;\" type=\"submit\"><span class=\"ui-button-text ui-c\">Iniciar Sesión</span></button><script id=\"loginForm:j_idt9_s\" type=\"text/javascript\">$(function(){PrimeFaces.cw(\"CommandButton\",\"widget_loginForm_j_idt9\",{id:\"loginForm:j_idt9\"});});</script>\n                            </div>\n                        </div><input type=\"hidden\" name=\"javax.faces.ViewState\" id=\"j_id1:javax.faces.ViewState:0\" value=\"-6339375963704226569:-7366391625838148145\" autocomplete=\"off\" />\n</form>\n                </div>\n            </div>\n        </div></body>\n</html>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Get data",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "postman-echo.com/get",
+          "host": [
+            "postman-echo",
+            "com"
+          ],
+          "path": [
+            "get"
+          ]
+        },
+        "description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+      },
+      "response": []
+    },
+    {
+      "name": "Post data",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful POST request\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});",
+              ""
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"name\": \"Add your name in the body\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "postman-echo.com/post",
+          "host": [
+            "postman-echo",
+            "com"
+          ],
+          "path": [
+            "post"
+          ]
+        },
+        "description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+      },
+      "response": []
+    },
+    {
+      "name": "New Request",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": ""
+        }
+      },
+      "response": []
+    }
+  ]
+}
