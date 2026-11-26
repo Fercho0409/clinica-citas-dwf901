@@ -7,21 +7,33 @@
 
     <persistence-unit name="clinicaPU" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        
-        <class>sv.edu.udb.clinica.entity.Usuario</class>
+
+        <class>sv.edu.udb.clinica.modelo.Especialidad</class>
+        <class>sv.edu.udb.clinica.modelo.Paciente</class>
+        <class>sv.edu.udb.clinica.modelo.Medico</class>
+        <class>sv.edu.udb.clinica.modelo.Cita</class>
+        <class>sv.edu.udb.clinica.modelo.Usuario</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
         <properties>
-            <!-- Conexión JDBC directa y segura -->
-            <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/clinica?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true"/>
-            <property name="javax.persistence.jdbc.user" value="root"/>
-            <property name="javax.persistence.jdbc.password" value="1234"/>
-
-            <!-- Configuración del motor Hibernate -->
+            <!--
+                DT-07: aqui ya NO van la URL, el usuario ni la contrasena.
+                Este archivo se sube al repositorio. Los datos de conexion los
+                agrega JPAUtil al arrancar, leidos por ConfiguracionBD desde
+                variables de entorno o desde db.properties (que no se versiona).
+            -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
-            <property name="hibernate.hbm2ddl.auto" value="update"/>
-            <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
+
+            <!--
+                DT-08: "validate" en lugar de "update".
+                Hibernate ya no modifica el esquema al arrancar: solo comprueba
+                que las tablas y columnas coincidan con las entidades. Si no
+                coinciden, la aplicacion no arranca y el registro dice que
+                columna falta. El esquema se cambia solo con clinicafinal.sql.
+            -->
+            <property name="hibernate.hbm2ddl.auto" value="validate"/>
+
+            <!-- show_sql y format_sql se activan con db.mostrarSql=true en db.properties -->
         </properties>
 
     </persistence-unit>

@@ -1,7 +1,23 @@
-# Copiar este archivo como db.properties y poner los datos reales.
-# db.properties esta en .gitignore: NO se sube al repositorio.
+# =====================================================================
+#  Configuracion de la base de datos (DT-07)
+# =====================================================================
+#  1. Copiar este archivo como db.properties en esta misma carpeta
+#     (src/main/resources/db.properties).
+#  2. Poner los datos de SU MySQL local.
+#
+#  db.properties esta en el .gitignore: NO se sube al repositorio.
+#  No escriba credenciales reales en este archivo .example.
+#
+#  En el servidor se pueden usar variables de entorno en lugar de este
+#  archivo, y tienen prioridad sobre el:
+#     CLINICA_DB_URL, CLINICA_DB_USUARIO, CLINICA_DB_PASSWORD
+#  o bien CLINICA_CONFIG=/ruta/al/archivo.properties
+# =====================================================================
 
 db.driver=com.mysql.cj.jdbc.Driver
-db.url=jdbc:mysql://localhost:3306/clinica?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/El_Salvador&characterEncoding=UTF-8
+db.url=jdbc:mysql://localhost:3306/clinica?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
 db.usuario=root
 db.password=CAMBIAR_POR_TU_PASSWORD
+
+# true para ver en la consola el SQL que genera Hibernate (solo desarrollo)
+db.mostrarSql=false
