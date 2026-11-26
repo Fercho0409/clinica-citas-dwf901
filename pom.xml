@@ -37,7 +37,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSTL: lo necesitan Facelets y las vistas JSP que quedan de la Fase 1 -->
+        <!-- JSTL: etiquetas c: que usan las vistas Facelets -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>

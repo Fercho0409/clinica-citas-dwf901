@@ -1,4 +1,4 @@
-package sv.edu.udb.clinica.entity;
+package sv.edu.udb.clinica.modelo;
 
 import java.io.Serializable;
 import javax.persistence.Column;

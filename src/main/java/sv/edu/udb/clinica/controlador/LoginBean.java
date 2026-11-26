@@ -1,4 +1,4 @@
-package sv.edu.udb.clinica.controller;
+package sv.edu.udb.clinica.controlador;
 
 import java.io.Serializable;
 import javax.faces.application.FacesMessage;
@@ -7,7 +7,8 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 import sv.edu.udb.clinica.dao.UsuarioDAO;
-import sv.edu.udb.clinica.entity.Usuario;
+import sv.edu.udb.clinica.error.Mensajes;
+import sv.edu.udb.clinica.modelo.Usuario;
 
 @ManagedBean(name = "loginBean")
 @SessionScoped
@@ -49,10 +50,9 @@ public class LoginBean implements Serializable {
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Usuario o contraseña incorrectos"));
                 return null;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_FATAL, "Error inesperado", "Ocurrió un error al procesar la solicitud: " + e.getMessage()));
+        } catch (RuntimeException e) {
+            // El detalle va al registro del servidor; en pantalla solo el codigo.
+            Mensajes.errorInesperado("No se pudo iniciar sesión", e);
             return null;
         }
     }
