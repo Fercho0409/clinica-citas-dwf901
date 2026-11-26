@@ -11,10 +11,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
-import javax.faces.context.FacesContext;
+import sv.edu.udb.clinica.error.Mensajes;
 import sv.edu.udb.clinica.dao.CitaDAO;
 import sv.edu.udb.clinica.dao.MedicoDAO;
 import sv.edu.udb.clinica.dao.PacienteDAO;
@@ -67,7 +66,7 @@ public class CitaBean implements Serializable {
             medicos = medicoDAO.listarMedicos();
             cargarCitas();
         } catch (RuntimeException ex) {
-            error("No se pudieron cargar los datos: " + ex.getMessage());
+            Mensajes.errorInesperado("No se pudieron cargar los datos", ex);
         }
     }
 
@@ -137,7 +136,7 @@ public class CitaBean implements Serializable {
         cita = citaDAO.buscarPorId(seleccionada.getIdCita());
         if (cita == null) {
             cita = new Cita();
-            error("La cita ya no existe.");
+            Mensajes.error("La cita ya no existe.");
             return;
         }
         idPacienteSeleccionado = cita.getPaciente() != null
@@ -153,17 +152,17 @@ public class CitaBean implements Serializable {
     public void guardar() {
 
         if (idPacienteSeleccionado == null || idMedicoSeleccionado == null) {
-            error("Debe seleccionar el paciente y el medico.");
+            Mensajes.error("Debe seleccionar el paciente y el medico.");
             return;
         }
         if (cita.getFecha() == null) {
-            error("Debe indicar la fecha de la cita.");
+            Mensajes.error("Debe indicar la fecha de la cita.");
             return;
         }
 
         LocalTime hora = interpretarHora(horaStr);
         if (hora == null) {
-            error("La hora debe escribirse en formato HH:mm, por ejemplo 09:30.");
+            Mensajes.error("La hora debe escribirse en formato HH:mm, por ejemplo 09:30.");
             return;
         }
         cita.setHora(hora);
@@ -171,14 +170,14 @@ public class CitaBean implements Serializable {
         // Regla: no se agenda en una fecha y hora que ya paso
         LocalDateTime momento = LocalDateTime.of(cita.getFecha(), hora);
         if (momento.isBefore(LocalDateTime.now())) {
-            error("No se puede agendar una cita en una fecha u hora que ya paso.");
+            Mensajes.error("No se puede agendar una cita en una fecha u hora que ya paso.");
             return;
         }
 
         // Regla HU-12: el medico no puede tener dos citas vigentes a la misma hora
         if (citaDAO.medicoOcupado(idMedicoSeleccionado, cita.getFecha(),
                 hora, cita.getIdCita())) {
-            error("Ese medico ya tiene una cita agendada el "
+            Mensajes.error("Ese medico ya tiene una cita agendada el "
                     + cita.getFechaTexto() + " a las " + horaStr + ".");
             return;
         }
@@ -191,7 +190,7 @@ public class CitaBean implements Serializable {
                 .findFirst().orElse(null);
 
         if (paciente == null || medico == null) {
-            error("El paciente o el medico seleccionado ya no existe.");
+            Mensajes.error("El paciente o el medico seleccionado ya no existe.");
             return;
         }
 
@@ -204,16 +203,16 @@ public class CitaBean implements Serializable {
         try {
             if (cita.getIdCita() == null) {
                 citaDAO.insertar(cita);
-                info("Cita agendada correctamente.");
+                Mensajes.info("Cita agendada correctamente.");
             } else {
                 citaDAO.actualizar(cita);
-                info("Cita actualizada correctamente.");
+                Mensajes.info("Cita actualizada correctamente.");
             }
             cargarCitas();
             filtrar();
             nueva();
         } catch (RuntimeException ex) {
-            error("No se pudo guardar la cita: " + ex.getMessage());
+            Mensajes.errorInesperado("No se pudo guardar la cita", ex);
         }
     }
 
@@ -239,33 +238,33 @@ public class CitaBean implements Serializable {
     public void cancelar(Cita seleccionada) {
         try {
             citaDAO.cambiarEstado(seleccionada.getIdCita(), EstadoCita.CANCELADA);
-            info("Cita cancelada. El horario del medico queda libre.");
+            Mensajes.info("Cita cancelada. El horario del medico queda libre.");
             cargarCitas();
             filtrar();
         } catch (RuntimeException ex) {
-            error("No se pudo cancelar la cita: " + ex.getMessage());
+            Mensajes.errorInesperado("No se pudo cancelar la cita", ex);
         }
     }
 
     public void marcarAtendida(Cita seleccionada) {
         try {
             citaDAO.cambiarEstado(seleccionada.getIdCita(), EstadoCita.ATENDIDA);
-            info("Cita marcada como atendida.");
+            Mensajes.info("Cita marcada como atendida.");
             cargarCitas();
             filtrar();
         } catch (RuntimeException ex) {
-            error("No se pudo actualizar la cita: " + ex.getMessage());
+            Mensajes.errorInesperado("No se pudo actualizar la cita", ex);
         }
     }
 
     public void eliminar(Cita seleccionada) {
         try {
             citaDAO.eliminar(seleccionada.getIdCita());
-            info("Cita eliminada.");
+            Mensajes.info("Cita eliminada.");
             cargarCitas();
             filtrar();
         } catch (RuntimeException ex) {
-            error("No se pudo eliminar la cita: " + ex.getMessage());
+            Mensajes.errorInesperado("No se pudo eliminar la cita", ex);
         }
     }
 
@@ -286,18 +285,6 @@ public class CitaBean implements Serializable {
             default:
                 return "badge-secondary";
         }
-    }
-
-    // ==================== Mensajes ====================
-
-    private void info(String mensaje) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO, "Listo", mensaje));
-    }
-
-    private void error(String mensaje) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Atencion", mensaje));
     }
 
     // ==================== Accesores y Getters requeridos por la vista ====================

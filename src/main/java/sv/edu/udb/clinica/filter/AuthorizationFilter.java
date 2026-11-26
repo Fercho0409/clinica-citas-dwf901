@@ -31,10 +31,13 @@ public class AuthorizationFilter implements Filter {
         boolean loggedIn = (session != null && session.getAttribute("usuarioLogueado") != null);
 
         boolean isLoginRequest = uri.endsWith("login.xhtml");
+        // La pagina de error debe verse aun sin sesion (p. ej. cuando la sesion expiro).
+        // Spring Security (tarea 2) debe dejarla tambien con acceso libre.
+        boolean isErrorPage = uri.endsWith("/error.xhtml");
         boolean isResourceRequest = uri.contains("/javax.faces.resource/") || uri.contains("/resources/");
         boolean isApiRequest = uri.contains("/api/"); // Permite el paso libre a cualquier ruta REST
 
-        if (loggedIn || isLoginRequest || isResourceRequest || isApiRequest) {
+        if (loggedIn || isLoginRequest || isErrorPage || isResourceRequest || isApiRequest) {
             chain.doFilter(request, response);
         } else {
             res.sendRedirect(req.getContextPath() + "/login.xhtml");

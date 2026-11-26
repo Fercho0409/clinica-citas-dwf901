@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
-import javax.faces.context.FacesContext;
+import sv.edu.udb.clinica.error.Mensajes;
 import sv.edu.udb.clinica.dao.PacienteDAO;
 import sv.edu.udb.clinica.modelo.Paciente;
 
@@ -34,7 +33,7 @@ public class PacienteBean implements Serializable {
         try {
             cargar();
         } catch (RuntimeException ex) {
-            error("No se pudieron cargar los pacientes: " + ex.getMessage());
+            Mensajes.errorInesperado("No se pudieron cargar los pacientes", ex);
         }
     }
 
@@ -70,7 +69,7 @@ public class PacienteBean implements Serializable {
         paciente = pacienteDAO.buscarPorId(seleccionado.getIdPaciente());
         if (paciente == null) {
             paciente = new Paciente();
-            error("El paciente ya no existe.");
+            Mensajes.error("El paciente ya no existe.");
         }
     }
 
@@ -79,11 +78,11 @@ public class PacienteBean implements Serializable {
         // Validacion de servidor: no se confia solo en el required del navegador
         if (vacio(paciente.getNombres()) || vacio(paciente.getApellidos())
                 || vacio(paciente.getDui())) {
-            error("Los nombres, apellidos y DUI son obligatorios.");
+            Mensajes.error("Los nombres, apellidos y DUI son obligatorios.");
             return;
         }
         if (paciente.getFechaNacimiento() == null) {
-            error("Debe indicar la fecha de nacimiento.");
+            Mensajes.error("Debe indicar la fecha de nacimiento.");
             return;
         }
 
@@ -91,7 +90,7 @@ public class PacienteBean implements Serializable {
             // Se revisa el duplicado antes de guardar, en lugar de esperar
             // a que la base rechace la operacion
             if (pacienteDAO.existeDui(paciente.getDui().trim(), paciente.getIdPaciente())) {
-                error("Ya existe un paciente registrado con el DUI "
+                Mensajes.error("Ya existe un paciente registrado con el DUI "
                         + paciente.getDui() + ".");
                 return;
             }
@@ -100,28 +99,29 @@ public class PacienteBean implements Serializable {
 
             if (paciente.getIdPaciente() == null) {
                 pacienteDAO.insertar(paciente);
-                info("Paciente registrado correctamente.");
+                Mensajes.info("Paciente registrado correctamente.");
             } else {
                 pacienteDAO.actualizar(paciente);
-                info("Paciente actualizado correctamente.");
+                Mensajes.info("Paciente actualizado correctamente.");
             }
             cargar();
             filtrar();
             nuevo();
         } catch (RuntimeException ex) {
-            error("No se pudo guardar el paciente: " + ex.getMessage());
+            Mensajes.errorInesperado("No se pudo guardar el paciente", ex);
         }
     }
 
     public void eliminar(Paciente seleccionado) {
         try {
             pacienteDAO.eliminar(seleccionado.getIdPaciente());
-            info("Paciente eliminado.");
+            Mensajes.info("Paciente eliminado.");
             cargar();
             filtrar();
         } catch (RuntimeException ex) {
             // La llave foranea de citas impide borrar un paciente con historial
-            error("No se pudo eliminar: es probable que el paciente tenga citas registradas.");
+            Mensajes.registrar("Eliminar paciente " + seleccionado.getIdPaciente(), ex);
+            Mensajes.error("No se pudo eliminar: es probable que el paciente tenga citas registradas.");
         }
     }
 
@@ -129,15 +129,7 @@ public class PacienteBean implements Serializable {
         return valor == null || valor.trim().isEmpty();
     }
 
-    private void info(String mensaje) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO, "Listo", mensaje));
-    }
 
-    private void error(String mensaje) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Atencion", mensaje));
-    }
 
     public List<Paciente> getPacientes() {
         return pacientes;

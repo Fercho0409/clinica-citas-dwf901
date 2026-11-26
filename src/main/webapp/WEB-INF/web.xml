@@ -19,9 +19,14 @@
     </servlet-mapping>
 
     <!-- ===== Configuración JSF ===== -->
+    <!--
+        Fase 4: Production. En Development JSF muestra al usuario el rastro
+        completo de las excepciones y mensajes internos. Para depurar en
+        local se puede volver a poner Development temporalmente.
+    -->
     <context-param>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
-        <param-value>Development</param-value>
+        <param-value>Production</param-value>
     </context-param>
     <context-param>
         <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
@@ -78,6 +83,36 @@
     <welcome-file-list>
         <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>
+
+    <!--
+        ===== Manejo centralizado de errores (Fase 4, tarea 3) =====
+        Los errores de los Managed Beans los atiende ManejadorExcepciones
+        (registrado en faces-config.xml). Estas entradas cubren lo que pasa
+        fuera de JSF: rutas inexistentes, acceso denegado y cualquier
+        excepcion que llegue hasta Tomcat. Todas terminan en la misma pagina,
+        sin mostrar el rastro de la excepcion.
+        Las rutas /api/* no llegan aqui: ManejadorErrores responde en JSON.
+    -->
+    <error-page>
+        <error-code>403</error-code>
+        <location>/error.xhtml</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error.xhtml</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/error.xhtml</location>
+    </error-page>
+    <error-page>
+        <exception-type>javax.faces.application.ViewExpiredException</exception-type>
+        <location>/error.xhtml?tipo=sesion</location>
+    </error-page>
+    <error-page>
+        <exception-type>java.lang.Throwable</exception-type>
+        <location>/error.xhtml</location>
+    </error-page>
 
     <session-config>
         <session-timeout>30</session-timeout>

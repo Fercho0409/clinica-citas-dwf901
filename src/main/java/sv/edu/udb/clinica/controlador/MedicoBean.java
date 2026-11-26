@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
-import javax.faces.context.FacesContext;
+import sv.edu.udb.clinica.error.Mensajes;
 import sv.edu.udb.clinica.dao.MedicoDAO;
 import sv.edu.udb.clinica.modelo.Especialidad;
 import sv.edu.udb.clinica.modelo.Medico;
@@ -41,7 +40,7 @@ public class MedicoBean implements Serializable {
             especialidades = medicoDAO.listarEspecialidades();
             cargar();
         } catch (RuntimeException ex) {
-            error("No se pudieron cargar los medicos: " + ex.getMessage());
+            Mensajes.errorInesperado("No se pudieron cargar los medicos", ex);
         }
     }
 
@@ -89,7 +88,7 @@ public class MedicoBean implements Serializable {
         medico = medicoDAO.buscarPorId(seleccionado.getIdMedico());
         if (medico == null) {
             medico = new Medico();
-            error("El medico ya no existe.");
+            Mensajes.error("El medico ya no existe.");
             return;
         }
         idEspecialidadSeleccionada = medico.getEspecialidad() != null
@@ -100,17 +99,17 @@ public class MedicoBean implements Serializable {
 
         if (vacio(medico.getNombres()) || vacio(medico.getApellidos())
                 || vacio(medico.getDui())) {
-            error("Los nombres, apellidos y DUI son obligatorios.");
+            Mensajes.error("Los nombres, apellidos y DUI son obligatorios.");
             return;
         }
         if (idEspecialidadSeleccionada == null) {
-            error("Debe seleccionar la especialidad.");
+            Mensajes.error("Debe seleccionar la especialidad.");
             return;
         }
 
         try {
             if (medicoDAO.existeDui(medico.getDui().trim(), medico.getIdMedico())) {
-                error("Ya existe un medico registrado con el DUI "
+                Mensajes.error("Ya existe un medico registrado con el DUI "
                         + medico.getDui() + ".");
                 return;
             }
@@ -121,7 +120,7 @@ public class MedicoBean implements Serializable {
                     .findFirst().orElse(null);
 
             if (especialidad == null) {
-                error("La especialidad seleccionada ya no existe.");
+                Mensajes.error("La especialidad seleccionada ya no existe.");
                 return;
             }
 
@@ -130,27 +129,28 @@ public class MedicoBean implements Serializable {
 
             if (medico.getIdMedico() == null) {
                 medicoDAO.insertar(medico);
-                info("Medico registrado correctamente.");
+                Mensajes.info("Medico registrado correctamente.");
             } else {
                 medicoDAO.actualizar(medico);
-                info("Medico actualizado correctamente.");
+                Mensajes.info("Medico actualizado correctamente.");
             }
             cargar();
             filtrar();
             nuevo();
         } catch (RuntimeException ex) {
-            error("No se pudo guardar el medico: " + ex.getMessage());
+            Mensajes.errorInesperado("No se pudo guardar el medico", ex);
         }
     }
 
     public void eliminar(Medico seleccionado) {
         try {
             medicoDAO.eliminar(seleccionado.getIdMedico());
-            info("Medico eliminado.");
+            Mensajes.info("Medico eliminado.");
             cargar();
             filtrar();
         } catch (RuntimeException ex) {
-            error("No se pudo eliminar: es probable que el medico tenga citas registradas.");
+            Mensajes.registrar("Eliminar medico " + seleccionado.getIdMedico(), ex);
+            Mensajes.error("No se pudo eliminar: es probable que el medico tenga citas registradas.");
         }
     }
 
@@ -158,15 +158,7 @@ public class MedicoBean implements Serializable {
         return valor == null || valor.trim().isEmpty();
     }
 
-    private void info(String mensaje) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO, "Listo", mensaje));
-    }
 
-    private void error(String mensaje) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Atencion", mensaje));
-    }
 
     public List<Medico> getMedicos() {
         return medicos;

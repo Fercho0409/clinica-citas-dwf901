@@ -286,18 +286,18 @@ Historias identificadas, fuera del alcance de los sprints cerrados. Se detallar�
 |---|-------------|-----------|--------|
 | DT-01 | En el modelo `Medico` el atributo se llama `jvpm` mientras la columna de la base es `dui` | Media | Resuelta en HT-13 |
 | DT-02 | El `doGet` de `PacienteServlet` captura las excepciones e imprime en consola sin informar al usuario | Media | Resuelta al migrar a Managed Beans (HT-16) |
-| DT-03 | `PruebaConexionServlet` fue una herramienta de diagnóstico inicial y ya no es necesaria | Baja | Pendiente |
+| DT-03 | `PruebaConexionServlet` fue una herramienta de diagnóstico inicial y ya no es necesaria | Baja | Resuelta en Fase 4 (tarea 3) — eliminado |
 | DT-04 | Las vistas `editar.jsp` quedaron sin uso: `formulario.jsp` atiende tanto la creación como la edición | Baja | Resuelta al rehacer las vistas con JSF (HT-17) |
 | DT-05 | La contraseña de base de datos utilizada en desarrollo es débil | Media | Pendiente para la Fase 4 |
-| DT-06 | `PruebaJPAServlet` es una herramienta temporal de verificación de la configuración de persistencia | Baja | Pendiente |
-| DT-07 | Las credenciales de la base quedaron escritas dentro del `persistence.xml`, que sí se versiona. En la Fase 1 residían en un archivo externo excluido del repositorio | **Alta** | Pendiente — revierte la decisión tomada en HT-02 y HT-12 |
-| DT-08 | `hibernate.hbm2ddl.auto` está configurado en `update`, por lo que Hibernate puede modificar el esquema de la base al arrancar la aplicación | **Alta** | Pendiente — debe cambiarse a `validate` |
+| DT-06 | `PruebaJPAServlet` es una herramienta temporal de verificación de la configuración de persistencia | Baja | Resuelta en Fase 4 (tarea 3) — eliminado |
+| DT-07 | Las credenciales de la base quedaron escritas dentro del `persistence.xml`, que sí se versiona. En la Fase 1 residían en un archivo externo excluido del repositorio | **Alta** | Resuelta en Fase 4 (tarea 3) — `ConfiguracionBD` lee `db.properties` o variables de entorno |
+| DT-08 | `hibernate.hbm2ddl.auto` está configurado en `update`, por lo que Hibernate puede modificar el esquema de la base al arrancar la aplicación | **Alta** | Resuelta en Fase 4 (tarea 3) — `validate` |
 | DT-09 | Las contraseñas de los usuarios se almacenan en texto plano y se comparan directamente | **Alta** | Pendiente para la Fase 4 |
-| DT-10 | `LoginBean` quedó en un paquete `controller` mientras los demás controladores están en `controlador` | Media | Pendiente |
-| DT-11 | La entidad `Usuario` está en el paquete `entity` y no en `modelo`, y su archivo fuente se encuentra en una carpeta que no corresponde al paquete que declara | Media | Pendiente |
-| DT-12 | Permanece código de la Fase 1 que ya nadie invoca: `ConexionBD`, `MedicoServlet` y `PacienteServlet` | Baja | Pendiente |
+| DT-10 | `LoginBean` quedó en un paquete `controller` mientras los demás controladores están en `controlador` | Media | Resuelta en Fase 4 (tarea 3) — movido a `controlador` |
+| DT-11 | La entidad `Usuario` está en el paquete `entity` y no en `modelo`, y su archivo fuente se encuentra en una carpeta que no corresponde al paquete que declara | Media | Resuelta en Fase 4 (tarea 3) — movida a `modelo` |
+| DT-12 | Permanece código de la Fase 1 que ya nadie invoca: `ConexionBD`, `MedicoServlet` y `PacienteServlet` | Baja | Resuelta en Fase 4 (tarea 3) — eliminados, junto con las vistas `.jsp` |
 | DT-13 | Los números de DUI del script de datos de prueba no superan la validación del dígito verificador, por lo que esos registros no pueden reeditarse sin corregir antes el documento | Media | Pendiente |
-| DT-14 | `UsuarioDAO` construye su propio `EntityManagerFactory` en lugar de usar `JPAUtil`, duplicando una operación costosa | Media | Pendiente |
+| DT-14 | `UsuarioDAO` construye su propio `EntityManagerFactory` en lugar de usar `JPAUtil`, duplicando una operación costosa | Media | Resuelta en Fase 4 (tarea 3) — usa `JPAUtil` |
 | DT-15 | Las reglas del agendamiento están implementadas dos veces: en `CitaBean` para las pantallas y en `CitaRecurso` para la API | Media | Pendiente — convendría trasladarlas a una capa de servicio común |
 | DT-16 | `ApiApplication` enumera los recursos a mano. Es lo que permite arrancar con Java 21, pero obliga a recordar ese paso al agregar un servicio | Baja | Aceptada — se resolvería actualizando Jersey, lo cual exige migrar a `jakarta` y cambiar de servidor |
 

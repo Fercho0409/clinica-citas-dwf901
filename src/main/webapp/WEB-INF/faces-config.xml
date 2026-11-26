@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                                  http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
+              version="2.2">
+
+    <!--
+        Manejo centralizado de errores de las pantallas.
+        Toda excepcion que escape de un Managed Bean pasa por
+        ManejadorExcepciones, que la registra y lleva a /error.xhtml.
+        Los Managed Beans siguen declarandose con @ManagedBean.
+    -->
+    <factory>
+        <exception-handler-factory>sv.edu.udb.clinica.error.ManejadorExcepcionesFactory</exception-handler-factory>
+    </factory>
+
+</faces-config>
