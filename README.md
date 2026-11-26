@@ -130,18 +130,28 @@ Debe devolver `4A6F73C3A9` (los bytes `C3A9` son la `é` en UTF-8).
 
 ### 4. Configurar las credenciales
 
-Los datos de conexión están en `src/main/resources/META-INF/persistence.xml`.
-Si la contraseña local de MySQL es distinta, editarla ahí:
+Las credenciales **no están en el código ni en el repositorio** (DT-07, resuelta en
+la Fase 4). Cada quien crea su propio archivo local:
 
-```xml
-<property name="javax.persistence.jdbc.user" value="root"/>
-<property name="javax.persistence.jdbc.password" value="..."/>
-```
+1. Copiar `src/main/resources/db.properties.example` como
+   `src/main/resources/db.properties` (misma carpeta).
+2. Poner la contraseña de su MySQL local en `db.password`.
 
-> **Esto es deuda técnica conocida.** En la Fase 1 las credenciales vivían en un
-> `db.properties` excluido del control de versiones. Al rehacer la configuración de
-> JPA quedaron escritas dentro del `persistence.xml`, que sí se versiona. Está
-> registrado como DT-07 en el Product Backlog y debe corregirse antes de la Fase 4.
+`db.properties` está en el `.gitignore`: **no se sube**. Si falta, la aplicación no
+arranca y el registro de Tomcat indica qué dato falta y dónde ponerlo.
+
+En el servidor se pueden usar variables de entorno en lugar del archivo; tienen
+prioridad sobre él:
+
+| Variable | Equivale a |
+|----------|------------|
+| `CLINICA_DB_URL` | `db.url` |
+| `CLINICA_DB_USUARIO` | `db.usuario` |
+| `CLINICA_DB_PASSWORD` | `db.password` |
+| `CLINICA_CONFIG` | ruta a un `.properties` externo, fuera de la aplicación |
+
+Quien lee estos valores es `config/ConfiguracionBD`, y `JPAUtil` se los pasa a JPA al
+crear la fábrica de `EntityManager`.
 
 ### 5. Configurar el IDE
 
@@ -183,28 +193,30 @@ Una vez dentro:
 
 ```
 src/main/java/sv/edu/udb/clinica/
-├── modelo/         Cita, Especialidad, EstadoCita, Medico, Paciente
+├── modelo/         Cita, Especialidad, EstadoCita, Medico, Paciente, Usuario
 │                   Entidades JPA
 ├── dao/            CitaDAO, EspecialidadDAO, MedicoDAO, PacienteDAO, UsuarioDAO
 │                   Acceso a datos con JPQL
-├── controlador/    CitaBean, MedicoBean, PacienteBean    Managed Beans
-│                   MedicoServlet, PacienteServlet        Fase 1, sin uso
-│                   PruebaConexionServlet, PruebaJPAServlet  diagnóstico
-├── controller/     LoginBean    (ver deuda técnica DT-10)
-├── entity/         Usuario      (ver deuda técnica DT-11)
+├── controlador/    AgendaBean, CitaBean, LoginBean, MedicoBean,
+│                   PacienteBean, PaginaErrorBean          Managed Beans
+├── config/         ConfiguracionBD    lee las credenciales fuera del código
+├── error/          ManejadorExcepciones(+Factory)  errores de las pantallas
+│                   Mensajes           mensajes comunes de los Managed Beans
 ├── filter/         AuthorizationFilter    protege todas las rutas
 ├── validator/      DuiValidator, EmailValidator,
 │                   FechaNacimientoValidator, TelefonoValidator
 └── util/           JPAUtil                fábrica de EntityManager
                     EspecialidadConverter  conversor JSF
-                    ConexionBD             Fase 1, sin uso
 
 src/main/resources/
+├── db.properties.example    Modelo de configuración (copiar como db.properties)
 └── META-INF/
-    └── persistence.xml      Unidad de persistencia
+    └── persistence.xml      Unidad de persistencia, sin credenciales
 
 src/main/webapp/
 ├── login.xhtml
+├── error.xhtml              Página de error común (403, 404, 500, sesión expirada)
+├── WEB-INF/faces-config.xml Registro del manejador de excepciones
 ├── WEB-INF/templates/
 │   └── layout.xhtml         Plantilla común (AdminLTE)
 └── views/
@@ -231,14 +243,35 @@ La unidad de persistencia usa `RESOURCE_LOCAL` porque Tomcat no administra
 transacciones. Cada operación de escritura abre su propia transacción y la deshace
 si algo falla.
 
-El `persistence.xml` declara una sola clase, pero las cinco entidades funcionan:
-Hibernate examina por su cuenta el directorio donde está el propio `persistence.xml`
-y reconoce todas las clases marcadas con `@Entity`.
+El `persistence.xml` enumera las cinco entidades y no contiene datos de conexión:
+esos los agrega `JPAUtil` al arrancar (ver sección 4).
 
-La propiedad `hibernate.hbm2ddl.auto` está en `update`, lo que significa que
-Hibernate **puede modificar el esquema** al arrancar. Para un entorno de entrega es
-preferible `validate`, que solo verifica que las entidades coincidan con las tablas
-sin alterar nada. Registrado como DT-08.
+`hibernate.hbm2ddl.auto` está en `validate` (DT-08): Hibernate **no modifica** el
+esquema, solo comprueba al arrancar que cada tabla y columna exista. Si falta algo,
+la aplicación no inicia y el registro dice qué columna falta. El esquema se cambia
+únicamente con `clinicafinal.sql`.
+
+### Manejo de errores en las pantallas
+
+Sigue el mismo criterio que `ManejadorErrores` en la API: el usuario nunca ve el
+rastro de una excepción ni mensajes internos de Hibernate.
+
+- Los errores previstos (DUI duplicado, horario ocupado) los muestra cada Managed
+  Bean con `Mensajes.error(...)`.
+- Los imprevistos dentro de un `catch` se informan con
+  `Mensajes.errorInesperado("No se pudo guardar la cita", ex)`: el detalle completo
+  va al registro de Tomcat con un código de seis caracteres, y en pantalla solo
+  aparece la acción que falló y ese código.
+- Lo que escapa de un Managed Bean lo atiende `ManejadorExcepciones` y lleva a
+  `error.xhtml` con el código de referencia. Si la pantalla caducó
+  (`ViewExpiredException`), explica que la sesión expiró.
+- Las `<error-page>` de `web.xml` llevan los 403, 404 y 500 de Tomcat a la misma
+  página.
+- `PROJECT_STAGE` está en `Production`. Para depurar en local se puede cambiar a
+  `Development` sin subir ese cambio.
+
+Para encontrar un error reportado por un usuario, buscar `[ref XXXXXX]` en el
+registro de Tomcat (en NetBeans, pestaña **Output → Tomcat**).
 
 ### Relaciones entre entidades
 
@@ -359,7 +392,10 @@ Si el correo no coincide, los commits no se acreditan al autor.
 | `Access denied for user 'root'@'localhost'` | El MySQL de XAMPP ocupa el puerto 3306 | Ver la sección siguiente |
 | `Failed to delete ...\target\...` | El proyecto está en OneDrive | Mover a `C:\proyectos` |
 | Nombres con `?` o caracteres raros | Script importado sin `--default-character-set=utf8mb4` | Reimportar con el comando de la sección 3 |
-| `Public Key Retrieval is not allowed` | Configuración de MySQL 8.4 | Ya incluido en la URL del `persistence.xml` |
+| `Public Key Retrieval is not allowed` | Configuración de MySQL 8.4 | Ya incluido en la URL de `db.properties.example` |
+| `Falta configuracion de la base de datos: db.url ...` | No existe `src/main/resources/db.properties` | Copiarlo desde `db.properties.example` (sección 4) |
+| `Schema-validation: missing column [...]` o `missing table [...]` | La base local no coincide con las entidades (`validate`) | Reimportar `clinicafinal.sql` |
+| Pantalla "Ocurrió un error inesperado" con un código | Excepción no controlada | Buscar `[ref CODIGO]` en el registro de Tomcat |
 | `Unable to create requested service [JdbcEnvironment]` | Hibernate no logró conectar | El error real está al final del seguimiento, normalmente es la contraseña o el puerto |
 | Ninguna pantalla carga, todo redirige al login | La tabla `usuarios` está vacía | Reimportar el script de base de datos |
 
@@ -435,16 +471,6 @@ agregarla a `ApiApplication`.
 Pendientes conocidos. El detalle completo está en `docs/product-backlog.md`.
 
 - Las contraseñas de los usuarios se guardan en texto plano.
-- Las credenciales de la base están escritas dentro del `persistence.xml`, que se
-  versiona. En la Fase 1 vivían en un archivo externo excluido del repositorio.
-- `hibernate.hbm2ddl.auto` está en `update`: Hibernate puede modificar el esquema al
-  arrancar.
-- `LoginBean` quedó en un paquete `controller` mientras los demás controladores están
-  en `controlador`.
-- `Usuario` está en el paquete `entity` y no en `modelo`, y su archivo fuente se
-  encuentra en una carpeta que no corresponde al paquete que declara.
-- Permanece código de la Fase 1 que ya nadie invoca: `ConexionBD`, `MedicoServlet`,
-  `PacienteServlet`, `PruebaConexionServlet` y `PruebaJPAServlet`.
 - Los DUI del script de datos de prueba no superan la validación del dígito
   verificador, por lo que esos registros no pueden reeditarse sin corregir el documento.
 - Las reglas del agendamiento están escritas dos veces: en `CitaBean`, para las

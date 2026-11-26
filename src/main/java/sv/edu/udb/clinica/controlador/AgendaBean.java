@@ -6,10 +6,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
-import javax.faces.context.FacesContext;
+import sv.edu.udb.clinica.error.Mensajes;
 import sv.edu.udb.clinica.dao.CitaDAO;
 import sv.edu.udb.clinica.dao.MedicoDAO;
 import sv.edu.udb.clinica.modelo.Cita;
@@ -54,19 +53,19 @@ public class AgendaBean implements Serializable {
                 buscar();
             }
         } catch (RuntimeException ex) {
-            error("No se pudieron cargar los medicos: " + ex.getMessage());
+            Mensajes.errorInesperado("No se pudieron cargar los medicos", ex);
         }
     }
 
     /** Carga la agenda del medico y la fecha seleccionados. */
     public void buscar() {
         if (idMedicoSeleccionado == null) {
-            error("Debe seleccionar un medico.");
+            Mensajes.error("Debe seleccionar un medico.");
             agenda = new ArrayList<>();
             return;
         }
         if (fecha == null) {
-            error("Debe indicar la fecha.");
+            Mensajes.error("Debe indicar la fecha.");
             agenda = new ArrayList<>();
             return;
         }
@@ -75,7 +74,7 @@ public class AgendaBean implements Serializable {
             agenda = citaDAO.agendaDelDia(idMedicoSeleccionado, fecha);
         } catch (RuntimeException ex) {
             agenda = new ArrayList<>();
-            error("No se pudo cargar la agenda: " + ex.getMessage());
+            Mensajes.errorInesperado("No se pudo cargar la agenda", ex);
         }
     }
 
@@ -157,13 +156,6 @@ public class AgendaBean implements Serializable {
             default:
                 return "badge badge-secondary";
         }
-    }
-
-    // ==================== Mensajes ====================
-
-    private void error(String mensaje) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Atencion", mensaje));
     }
 
     // ==================== Accesores ====================
