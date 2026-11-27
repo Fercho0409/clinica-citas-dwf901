@@ -14,11 +14,21 @@ import sv.edu.udb.clinica.util.JPAUtil;
  */
 public class PacienteDAO {
 
+    /*
+     * Los listados salen por numero de paciente, es decir en el orden
+     * en que se fueron registrando, y no por apellido.
+     *
+     * El motivo es practico: al dar de alta a alguien, la recepcion
+     * necesita verlo de inmediato, y con el orden alfabetico el
+     * registro nuevo caia en medio de la lista y parecia perdido.
+     * Para encontrar a un paciente por nombre ya existe el buscador.
+     */
+
     public List<Paciente> listarPacientes() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
             return em.createQuery(
-                    "SELECT p FROM Paciente p ORDER BY p.apellidos, p.nombres",
+                    "SELECT p FROM Paciente p ORDER BY p.idPaciente",
                     Paciente.class).getResultList();
         } finally {
             em.close();
@@ -72,7 +82,7 @@ public class PacienteDAO {
                     "SELECT p FROM Paciente p "
                     + "WHERE LOWER(p.nombres) LIKE :t OR LOWER(p.apellidos) LIKE :t "
                     + "OR p.dui LIKE :t "
-                    + "ORDER BY p.apellidos, p.nombres", Paciente.class)
+                    + "ORDER BY p.idPaciente", Paciente.class)
                     .setParameter("t", "%" + texto.trim().toLowerCase() + "%")
                     .getResultList();
         } finally {

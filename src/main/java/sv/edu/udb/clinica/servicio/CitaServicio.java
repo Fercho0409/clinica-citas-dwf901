@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -74,6 +76,59 @@ public class CitaServicio {
     private static final DateTimeFormatter FORMATO_HORA =
             DateTimeFormatter.ofPattern("HH:mm");
 
+    /**
+     * Orden en que se muestran las citas.
+     *
+     * El criterio es lo que le sirve a quien atiende el mostrador:
+     * primero lo que viene, despues lo que ya paso.
+     *
+     *   - las citas de hoy en adelante van arriba, de la mas cercana
+     *     a la mas lejana, porque son las que hay que preparar
+     *
+     *   - las citas pasadas van debajo, de la mas reciente a la mas
+     *     antigua, porque de lo viejo interesa primero lo de ayer
+     *
+     * Se ordena aqui y no en la consulta a la base por dos razones.
+     * Una, que el criterio depende de la fecha de hoy y escribirlo en
+     * la consulta lo volveria dificil de leer. Dos, y mas importante,
+     * que puesto aqui lo heredan por igual las pantallas y la API: el
+     * orden tambien es una decision del negocio, no de cada pantalla.
+     */
+    private static final Comparator<Cita> POR_PROXIMIDAD = (a, b) -> {
+
+        LocalDate hoy = LocalDate.now();
+        LocalDate fa = a.getFecha();
+        LocalDate fb = b.getFecha();
+
+        // Las citas sin fecha, si las hubiera, al final
+        if (fa == null && fb == null) { return 0; }
+        if (fa == null) { return 1; }
+        if (fb == null) { return -1; }
+
+        boolean aEsFutura = !fa.isBefore(hoy);
+        boolean bEsFutura = !fb.isBefore(hoy);
+
+        // Una futura siempre va antes que una pasada
+        if (aEsFutura != bEsFutura) {
+            return aEsFutura ? -1 : 1;
+        }
+
+        int porFecha = aEsFutura
+                ? fa.compareTo(fb)   // futuras: la mas cercana primero
+                : fb.compareTo(fa);  // pasadas: la mas reciente primero
+        if (porFecha != 0) {
+            return porFecha;
+        }
+
+        // Mismo dia: por hora, en el mismo sentido que la fecha
+        LocalTime ha = a.getHora();
+        LocalTime hb = b.getHora();
+        if (ha == null || hb == null) {
+            return 0;
+        }
+        return aEsFutura ? ha.compareTo(hb) : hb.compareTo(ha);
+    };
+
     private final CitaDAO citaDAO;
 
     /**
@@ -102,8 +157,14 @@ public class CitaServicio {
 
     // ==================== Consultas ====================
 
+    /**
+     * Listado completo de citas, con las proximas arriba.
+     * El criterio esta explicado en POR_PROXIMIDAD.
+     */
     public List<Cita> listar() {
-        return citaDAO.listarCitas();
+        List<Cita> lista = new ArrayList<>(citaDAO.listarCitas());
+        lista.sort(POR_PROXIMIDAD);
+        return lista;
     }
 
     /** Devuelve la cita o falla si no existe. */

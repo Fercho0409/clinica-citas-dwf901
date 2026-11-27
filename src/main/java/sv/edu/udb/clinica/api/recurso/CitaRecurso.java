@@ -4,7 +4,6 @@ import static sv.edu.udb.clinica.api.util.Campos.limpiar;
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -34,13 +33,13 @@ import sv.edu.udb.clinica.api.dto.ErrorRespuesta;
 import sv.edu.udb.clinica.api.error.ApiExcepcion;
 import sv.edu.udb.clinica.api.util.LectorJson;
 import sv.edu.udb.clinica.config.Contexto;
-import sv.edu.udb.clinica.dao.CitaDAO;
 import sv.edu.udb.clinica.dao.MedicoDAO;
 import sv.edu.udb.clinica.dao.PacienteDAO;
 import sv.edu.udb.clinica.modelo.Cita;
 import sv.edu.udb.clinica.modelo.EstadoCita;
 import sv.edu.udb.clinica.modelo.Medico;
 import sv.edu.udb.clinica.modelo.Paciente;
+import sv.edu.udb.clinica.servicio.CitaServicio;
 
 /**
  * Servicio REST de citas.
@@ -59,9 +58,34 @@ import sv.edu.udb.clinica.modelo.Paciente;
  * (medico ocupado, fecha pasada, cita ya cerrada). Todos con el
  * formato de ErrorRespuesta.
  *
- * Las reglas son las mismas que aplica CitaBean en las pantallas, y el
- * acceso a datos es el mismo CitaDAO: la API no duplica la logica de
- * persistencia, solo la expone.
+ * ===================================================================
+ *  Que cambio en la Fase 4
+ * ===================================================================
+ *
+ * Este archivo tenia escritas las reglas del agendamiento, las mismas
+ * que estaban tambien en CitaBean para las pantallas. Era la deuda
+ * tecnica DT-15, con el riesgo de que la clinica se comportara
+ * distinto segun por donde entrara la peticion.
+ *
+ * Ahora las reglas viven en CitaServicio y aqui no queda ninguna. Lo
+ * que si se conserva es la validacion de formato, y eso no es un
+ * descuido: comprobar que la fecha venga escrita como dd/MM/yyyy es
+ * una preocupacion de la API, no del negocio. Las pantallas no la
+ * necesitan porque el calendario no deja escribir una fecha mal.
+ *
+ * El reparto quedo asi:
+ *
+ *   este archivo   revisa como viene escrito y junta los errores de
+ *                  formato de todos los campos, para que el cliente
+ *                  pueda corregirlos en un solo intento (400)
+ *
+ *   CitaServicio   decide si lo que se pide se puede hacer, y avisa
+ *                  lanzando una excepcion del dominio
+ *
+ *   MapeadorServicio  convierte esa excepcion en 404 o 409
+ *
+ * Por eso aqui ya no hay bloques try/catch envolviendo cada llamada:
+ * las excepciones del servicio suben solas y el mapeador las atiende.
  */
 @Path("citas")
 @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
@@ -75,9 +99,21 @@ public class CitaRecurso {
     private static final DateTimeFormatter FORMATO_HORA =
             DateTimeFormatter.ofPattern("HH:mm");
 
-    // Lo administra Spring. Jersey no sabe inyectar componentes de
-    // Spring, de modo que se le piden a traves de Contexto.
-    private final CitaDAO citaDAO = Contexto.obtener(CitaDAO.class);
+    /**
+     * La capa de servicio, administrada por Spring.
+     *
+     * Jersey no sabe inyectar componentes de Spring, de modo que se le
+     * piden a traves de Contexto. Esta es la unica linea del recurso
+     * que conoce ese detalle.
+     */
+    private final CitaServicio citaServicio = Contexto.obtener(CitaServicio.class);
+
+    /**
+     * Solo se usan para comprobar que el paciente y el medico existan
+     * mientras se revisan los campos, y poder devolver ese error junto
+     * a los demas en una sola respuesta. Siguen construyendose a mano
+     * porque esos modulos no se han migrado a Spring.
+     */
     private final PacienteDAO pacienteDAO = new PacienteDAO();
     private final MedicoDAO medicoDAO = new MedicoDAO();
 
@@ -105,7 +141,7 @@ public class CitaRecurso {
         final EstadoCita estado = (limpiar(estadoTexto) == null)
                 ? null : interpretarEstado(estadoTexto);
 
-        return citaDAO.listarCitas().stream()
+        return citaServicio.listar().stream()
                 .filter(c -> idPaciente == null
                         || (c.getPaciente() != null
                         && Objects.equals(c.getPaciente().getIdPaciente(), idPaciente)))
@@ -125,7 +161,7 @@ public class CitaRecurso {
     @GET
     @Path("{id: \\d+}")
     public CitaRespuesta obtener(@PathParam("id") int id) {
-        return CitaRespuesta.desde(buscarOFallar(id));
+        return CitaRespuesta.desde(citaServicio.obtener(id));
     }
 
     /**
@@ -139,20 +175,11 @@ public class CitaRecurso {
     public List<CitaRespuesta> agendaDelDia(@QueryParam("idMedico") Integer idMedico,
                                             @QueryParam("fecha") String fechaTexto) {
 
-        if (idMedico == null) {
-            throw new ApiExcepcion(ErrorRespuesta.solicitudInvalida(
-                    "Debe indicar el médico en el parámetro idMedico."));
-        }
-        if (medicoDAO.buscarPorId(idMedico) == null) {
-            throw new ApiExcepcion(ErrorRespuesta.noEncontrado(
-                    "No existe un médico con el número " + idMedico + "."));
-        }
-
         LocalDate fecha = (limpiar(fechaTexto) == null)
                 ? LocalDate.now()
                 : interpretarFecha(fechaTexto, "fecha");
 
-        return citaDAO.agendaDelDia(idMedico, fecha).stream()
+        return citaServicio.agendaDelDia(idMedico, fecha).stream()
                 .map(CitaRespuesta::desde)
                 .collect(Collectors.toList());
     }
@@ -165,10 +192,9 @@ public class CitaRecurso {
         CitaSolicitud datos = LectorJson.leer(cuerpo, CitaSolicitud.class);
 
         Cita cita = new Cita();
-        cita.setEstado(EstadoCita.PROGRAMADA);
-        aplicar(datos, cita, null);
+        revisarCampos(datos, cita);
 
-        citaDAO.insertar(cita);
+        citaServicio.guardar(cita, datos.getIdPaciente(), datos.getIdMedico());
         LOG.info("API: cita agendada, id " + cita.getIdCita());
 
         URI ubicacion = uriInfo.getAbsolutePathBuilder()
@@ -183,38 +209,26 @@ public class CitaRecurso {
      *
      * Si cambia la fecha o la hora, la cita pasa a REPROGRAMADA: ese
      * estado existe justamente para distinguir una cita movida de una
-     * agendada de primera, y asi queda registrado en el historial.
+     * agendada de primera, y asi queda registrado en el historial. De
+     * eso se encarga el servicio.
      *
      * Una cita cancelada o ya atendida no se edita: su horario ya se
      * libero o la consulta ya ocurrio, de modo que modificarla
-     * falsearia el historial. Para esos casos se agenda una nueva.
+     * falsearia el historial. Esa comprobacion tambien es del
+     * servicio, y llega aqui convertida en un 409.
      */
     @PUT
     @Path("{id: \\d+}")
     @Consumes(MediaType.APPLICATION_JSON)
     public CitaRespuesta actualizar(@PathParam("id") int id, String cuerpo) {
-        Cita cita = buscarOFallar(id);
-
-        if (!cita.getEstado().ocupaHorario()) {
-            throw new ApiExcepcion(ErrorRespuesta.conflicto(
-                    "No se puede modificar una cita " + cita.getEstado().getEtiqueta().toLowerCase()
-                    + ". Agende una cita nueva."));
-        }
+        Cita cita = citaServicio.obtener(id);
+        citaServicio.verificarAbierta(cita);
 
         CitaSolicitud datos = LectorJson.leer(cuerpo, CitaSolicitud.class);
+        revisarCampos(datos, cita);
 
-        LocalDate fechaAnterior = cita.getFecha();
-        LocalTime horaAnterior = cita.getHora();
-
-        aplicar(datos, cita, id);
-
-        boolean seMovio = !Objects.equals(fechaAnterior, cita.getFecha())
-                || !Objects.equals(horaAnterior, cita.getHora());
-        if (seMovio) {
-            cita.setEstado(EstadoCita.REPROGRAMADA);
-        }
-
-        citaDAO.actualizar(cita);
+        boolean seMovio = citaServicio.guardar(cita, datos.getIdPaciente(),
+                datos.getIdMedico());
         LOG.info("API: cita actualizada, id " + id + (seMovio ? " (reprogramada)" : ""));
         return CitaRespuesta.desde(cita);
     }
@@ -226,63 +240,36 @@ public class CitaRecurso {
     @PATCH
     @Path("{id: \\d+}/cancelar")
     public CitaRespuesta cancelar(@PathParam("id") int id) {
-        return cambiarEstado(id, EstadoCita.CANCELADA);
+        Cita cita = citaServicio.cancelar(id);
+        LOG.info("API: cita " + id + " cancelada");
+        return CitaRespuesta.desde(cita);
     }
 
     @PATCH
     @Path("{id: \\d+}/atender")
     public CitaRespuesta atender(@PathParam("id") int id) {
-        return cambiarEstado(id, EstadoCita.ATENDIDA);
+        Cita cita = citaServicio.atender(id);
+        LOG.info("API: cita " + id + " marcada como atendida");
+        return CitaRespuesta.desde(cita);
     }
 
-    // ==================== Apoyo ====================
-
-    private Cita buscarOFallar(int id) {
-        Cita cita = citaDAO.buscarPorId(id);
-        if (cita == null) {
-            throw new ApiExcepcion(ErrorRespuesta.noEncontrado(
-                    "No existe una cita con el número " + id + "."));
-        }
-        return cita;
-    }
-
-    private CitaRespuesta cambiarEstado(int id, EstadoCita nuevoEstado) {
-        Cita cita = buscarOFallar(id);
-
-        if (nuevoEstado.equals(cita.getEstado())) {
-            throw new ApiExcepcion(ErrorRespuesta.conflicto(
-                    "La cita ya está marcada como "
-                    + nuevoEstado.getEtiqueta().toLowerCase() + "."));
-        }
-        if (!cita.getEstado().ocupaHorario()) {
-            throw new ApiExcepcion(ErrorRespuesta.conflicto(
-                    "La cita está " + cita.getEstado().getEtiqueta().toLowerCase()
-                    + " y ya no admite cambios de estado."));
-        }
-
-        citaDAO.cambiarEstado(id, nuevoEstado);
-        LOG.info("API: cita " + id + " marcada como " + nuevoEstado.name());
-        return CitaRespuesta.desde(citaDAO.buscarPorId(id));
-    }
+    // ==================== Revision de los campos ====================
 
     /**
-     * Valida todos los campos de una vez y, si todo esta bien, los
+     * Revisa como vienen escritos los campos y, si todo esta bien, los
      * copia a la entidad.
      *
-     * Primero se revisa el formato de todos los campos y se devuelven
-     * juntos, para que el formulario del cliente pueda marcarlos en un
-     * solo intento. Solo despues se comprueban las reglas de negocio,
-     * que responden 409 en lugar de 400: la peticion estaba bien
-     * escrita, lo que no se puede es hacerla.
+     * Aqui NO hay reglas de negocio: no se comprueba si el medico esta
+     * ocupado ni si la fecha ya paso. Eso lo decide CitaServicio
+     * cuando se le pide guardar.
      *
-     * idExcluir lleva el numero de la cita que se esta editando, para
-     * que no choque consigo misma al revisar la agenda del medico. Al
-     * agendar una nueva se pasa null.
+     * Lo que si se hace, y es propio de la API, es juntar todos los
+     * errores de formato en un solo lugar antes de rechazar. Si se
+     * devolviera el primero que aparece, el cliente tendria que
+     * corregir de uno en uno y volver a enviar cada vez.
      */
-    private void aplicar(CitaSolicitud d, Cita cita, Integer idExcluir) {
+    private void revisarCampos(CitaSolicitud d, Cita cita) {
         Map<String, String> errores = new LinkedHashMap<>();
-
-        // ----- Formato y presencia -----
 
         Paciente paciente = null;
         if (d.getIdPaciente() == null) {
@@ -338,26 +325,6 @@ public class CitaRecurso {
 
         if (!errores.isEmpty()) {
             throw new ApiExcepcion(ErrorRespuesta.validacion(errores));
-        }
-
-        // ----- Reglas de negocio -----
-
-        // No se agenda en una fecha y hora que ya paso. Se comprueban
-        // juntas y no solo la fecha: una cita para hoy a las ocho de la
-        // manana, pedida a las tres de la tarde, tambien es pasado.
-        if (LocalDateTime.of(fecha, hora).isBefore(LocalDateTime.now())) {
-            throw new ApiExcepcion(ErrorRespuesta.conflicto(
-                    "No se puede agendar una cita en una fecha u hora que ya pasó."));
-        }
-
-        // Regla HU-12: el medico no puede tener dos citas vigentes a la
-        // misma hora. Una cita cancelada o atendida no cuenta, porque
-        // su horario volvio a quedar libre.
-        if (citaDAO.medicoOcupado(medico.getIdMedico(), fecha, hora, idExcluir)) {
-            throw new ApiExcepcion(ErrorRespuesta.conflicto(
-                    "El médico " + medico.getNombres() + " " + medico.getApellidos()
-                    + " ya tiene una cita agendada el " + fecha.format(FORMATO_FECHA)
-                    + " a las " + hora.format(FORMATO_HORA) + "."));
         }
 
         cita.setPaciente(paciente);

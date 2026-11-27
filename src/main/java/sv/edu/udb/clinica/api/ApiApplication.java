@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.core.Application;
 import sv.edu.udb.clinica.api.error.ManejadorErrores;
+import sv.edu.udb.clinica.api.error.MapeadorServicio;
 import sv.edu.udb.clinica.api.recurso.CitaRecurso;
 import sv.edu.udb.clinica.api.recurso.EspecialidadRecurso;
 import sv.edu.udb.clinica.api.recurso.MedicoRecurso;
@@ -49,6 +50,7 @@ public class ApiApplication extends Application {
 
         // Proveedores: manejo de errores y permisos de origen cruzado
         clases.add(ManejadorErrores.class);
+        clases.add(MapeadorServicio.class);
         clases.add(FiltroCors.class);
 
         return clases;
