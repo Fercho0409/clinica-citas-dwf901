@@ -33,6 +33,7 @@ import sv.edu.udb.clinica.api.dto.CitaSolicitud;
 import sv.edu.udb.clinica.api.dto.ErrorRespuesta;
 import sv.edu.udb.clinica.api.error.ApiExcepcion;
 import sv.edu.udb.clinica.api.util.LectorJson;
+import sv.edu.udb.clinica.config.Contexto;
 import sv.edu.udb.clinica.dao.CitaDAO;
 import sv.edu.udb.clinica.dao.MedicoDAO;
 import sv.edu.udb.clinica.dao.PacienteDAO;
@@ -74,7 +75,9 @@ public class CitaRecurso {
     private static final DateTimeFormatter FORMATO_HORA =
             DateTimeFormatter.ofPattern("HH:mm");
 
-    private final CitaDAO citaDAO = new CitaDAO();
+    // Lo administra Spring. Jersey no sabe inyectar componentes de
+    // Spring, de modo que se le piden a traves de Contexto.
+    private final CitaDAO citaDAO = Contexto.obtener(CitaDAO.class);
     private final PacienteDAO pacienteDAO = new PacienteDAO();
     private final MedicoDAO medicoDAO = new MedicoDAO();
 

@@ -8,6 +8,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import sv.edu.udb.clinica.dao.CitaDAO;
@@ -35,7 +36,24 @@ public class AgendaBean implements Serializable {
     private static final DateTimeFormatter FORMATO_FECHA =
             DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private final CitaDAO citaDAO = new CitaDAO();
+    /**
+     * Acceso a datos de citas.
+     *
+     * Antes esta linea decia "new CitaDAO()": la pantalla construia su
+     * propio objeto de acceso a datos y se hacia cargo de el. Ahora lo
+     * recibe ya construido, con su conexion a la base puesta y con las
+     * transacciones administradas por Spring.
+     *
+     * @ManagedProperty es la forma de JSF de pedir que le inyecten
+     * algo. El texto entre llaves es el nombre con el que Spring
+     * conoce al componente. Funciona gracias al puente que se registro
+     * en el faces-config.xml.
+     *
+     * El campo ya no puede ser "final" porque quien lo rellena es JSF,
+     * despues de construir el bean, usando el setter de mas abajo.
+     */
+    @ManagedProperty("#{citaDAO}")
+    private CitaDAO citaDAO;
     private final MedicoDAO medicoDAO = new MedicoDAO();
 
     private List<Medico> medicos = new ArrayList<>();
@@ -167,6 +185,14 @@ public class AgendaBean implements Serializable {
     }
 
     // ==================== Accesores ====================
+
+    /**
+     * Lo usa JSF para inyectar el acceso a datos. No se llama desde
+     * las vistas.
+     */
+    public void setCitaDAO(CitaDAO citaDAO) {
+        this.citaDAO = citaDAO;
+    }
 
     public List<Medico> getMedicos() {
         return medicos;

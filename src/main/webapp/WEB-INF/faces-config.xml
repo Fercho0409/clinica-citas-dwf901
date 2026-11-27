@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                                  http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
+              version="2.2">
+
+    <!--
+        Configuración de JSF.
+
+        Hasta la Fase 3 este archivo no existía: JSF funcionaba con sus
+        valores por omisión y los Managed Beans se declaraban con
+        anotaciones. Se crea ahora por una sola razón.
+
+        ============================================================
+         El puente entre JSF y Spring
+        ============================================================
+
+        Las pantallas necesitan usar los componentes que administra
+        Spring, pero JSF no los conoce: cuando una vista escribe
+        #{citaDAO}, JSF busca únicamente entre sus propios Managed
+        Beans y no encuentra nada.
+
+        El resolvedor que se registra abajo agrega un paso más a esa
+        búsqueda: si JSF no encuentra el nombre entre los suyos, se lo
+        pregunta a Spring antes de darse por vencido.
+
+        Gracias a eso, un Managed Bean puede declarar:
+
+            @ManagedProperty("#{citaDAO}")
+            private CitaDAO citaDAO;
+
+        y recibir el componente ya construido, con su conexión a la
+        base puesta, en lugar de crearlo con "new". Eso es inyección de
+        dependencias: la clase declara qué necesita y alguien más se lo
+        entrega.
+
+        Una ventaja práctica de hacerlo así, y no guardando el objeto
+        en un campo fijo: JSF vuelve a inyectarlo cada vez que
+        reconstruye la vista, de modo que el bean no se queda con una
+        referencia vieja.
+    -->
+    <application>
+        <el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
+    </application>
+
+</faces-config>
