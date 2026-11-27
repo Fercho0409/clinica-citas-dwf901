@@ -82,4 +82,27 @@
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
+    <!-- ================================================= -->
+    <!-- Spring: arranque del contenedor de componentes     -->
+    <!-- ================================================= -->
+    <!--
+        La configuracion no esta en un XML sino en una clase anotada,
+        SpringConfig. Por eso se le indica a Spring que use el contexto
+        de anotaciones y se le pasa el nombre de esa clase.
+
+        El listener arranca Spring al levantar la aplicacion, antes de
+        que JSF o Jersey atiendan la primera peticion.
+    -->
+    <context-param>
+        <param-name>contextClass</param-name>
+        <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+    </context-param>
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>sv.edu.udb.clinica.config.SpringConfig</param-value>
+    </context-param>
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
 </web-app>

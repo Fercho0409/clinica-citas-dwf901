@@ -18,6 +18,7 @@
         <mojarra.version>2.2.20</mojarra.version>
         <primefaces.version>8.0</primefaces.version>
         <hibernate.version>5.6.15.Final</hibernate.version>
+        <spring.version>5.3.39</spring.version>
     </properties>
 
     <dependencies>
@@ -97,6 +98,46 @@
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
             <version>2.35</version>
+        </dependency>
+
+        <!-- ========================================== -->
+        <!-- Spring Framework (Fase 4)                  -->
+        <!-- ========================================== -->
+        <!--
+             Rama 5.3: es la ultima que usa javax. Spring 6 y Spring Boot 3
+             exigen jakarta, incompatible con Tomcat 9, con este JSF y con
+             Hibernate 5.6. La 5.3.39 tiene soporte para Java 21.
+
+             Se declaran tres modulos, cada uno por un motivo distinto:
+
+               spring-context : el contenedor de componentes y la
+                                inyeccion de dependencias.
+               spring-orm     : el puente con JPA e Hibernate y el
+                                manejo de transacciones.
+               spring-web     : arranca el contexto dentro del servidor
+                                y conecta Spring con JSF.
+
+             Los demas (spring-core, spring-beans, spring-tx,
+             spring-jdbc, spring-aop, spring-expression) llegan solos
+             como dependencias de estos tres.
+        -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
+        <!-- Arranque del contexto dentro del servidor y puente con JSF -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
         </dependency>
 
     </dependencies>
