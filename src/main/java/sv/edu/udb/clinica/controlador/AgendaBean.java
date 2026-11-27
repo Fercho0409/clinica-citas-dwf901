@@ -11,21 +11,32 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
-import sv.edu.udb.clinica.dao.CitaDAO;
 import sv.edu.udb.clinica.dao.MedicoDAO;
 import sv.edu.udb.clinica.modelo.Cita;
 import sv.edu.udb.clinica.modelo.EstadoCita;
 import sv.edu.udb.clinica.modelo.Medico;
+import sv.edu.udb.clinica.servicio.CitaServicio;
+import sv.edu.udb.clinica.servicio.ServicioExcepcion;
 
 /**
  * Controlador de la agenda diaria del medico (HU-14).
  *
  * Responde a una sola pregunta: que citas tiene este medico este dia.
- * La consulta ya existia en CitaDAO desde la Fase 2; lo unico que
- * faltaba era la pantalla que la invoca.
  *
  * Al abrir, muestra la agenda de hoy del primer medico de la lista,
  * de modo que el usuario vea algo util sin tener que elegir nada.
+ *
+ * ===================================================================
+ *  Que cambio en la Fase 4
+ * ===================================================================
+ *
+ * Antes esta pantalla le hablaba directamente al DAO y comprobaba por
+ * su cuenta que hubiera un medico y una fecha seleccionados. Ahora se
+ * lo pide a CitaServicio, que es quien decide si la peticion tiene
+ * sentido y responde con un mensaje redactado cuando no lo tiene.
+ *
+ * La pantalla quedo reducida a lo que le corresponde: recoger lo que
+ * el usuario elige, pedir los datos y mostrarlos.
  */
 @ManagedBean(name = "agendaBean")
 @ViewScoped
@@ -37,23 +48,17 @@ public class AgendaBean implements Serializable {
             DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     /**
-     * Acceso a datos de citas.
-     *
-     * Antes esta linea decia "new CitaDAO()": la pantalla construia su
-     * propio objeto de acceso a datos y se hacia cargo de el. Ahora lo
-     * recibe ya construido, con su conexion a la base puesta y con las
-     * transacciones administradas por Spring.
-     *
-     * @ManagedProperty es la forma de JSF de pedir que le inyecten
-     * algo. El texto entre llaves es el nombre con el que Spring
-     * conoce al componente. Funciona gracias al puente que se registro
-     * en el faces-config.xml.
-     *
-     * El campo ya no puede ser "final" porque quien lo rellena es JSF,
-     * despues de construir el bean, usando el setter de mas abajo.
+     * La capa de servicio, inyectada por Spring a traves del puente
+     * que se registro en el faces-config.xml.
      */
-    @ManagedProperty("#{citaDAO}")
-    private CitaDAO citaDAO;
+    @ManagedProperty("#{citaServicio}")
+    private CitaServicio citaServicio;
+
+    /**
+     * Solo sirve para llenar el desplegable de medicos. Sigue
+     * construyendose a mano porque ese modulo todavia no se migro a
+     * Spring.
+     */
     private final MedicoDAO medicoDAO = new MedicoDAO();
 
     private List<Medico> medicos = new ArrayList<>();
@@ -72,25 +77,17 @@ public class AgendaBean implements Serializable {
                 buscar();
             }
         } catch (RuntimeException ex) {
-            error("No se pudieron cargar los medicos: " + ex.getMessage());
+            error("No se pudieron cargar los médicos: " + ex.getMessage());
         }
     }
 
     /** Carga la agenda del medico y la fecha seleccionados. */
     public void buscar() {
-        if (idMedicoSeleccionado == null) {
-            error("Debe seleccionar un medico.");
-            agenda = new ArrayList<>();
-            return;
-        }
-        if (fecha == null) {
-            error("Debe indicar la fecha.");
-            agenda = new ArrayList<>();
-            return;
-        }
-
         try {
-            agenda = citaDAO.agendaDelDia(idMedicoSeleccionado, fecha);
+            agenda = citaServicio.agendaDelDia(idMedicoSeleccionado, fecha);
+        } catch (ServicioExcepcion ex) {
+            agenda = new ArrayList<>();
+            error(ex.getMessage());
         } catch (RuntimeException ex) {
             agenda = new ArrayList<>();
             error("No se pudo cargar la agenda: " + ex.getMessage());
@@ -181,17 +178,14 @@ public class AgendaBean implements Serializable {
 
     private void error(String mensaje) {
         FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Atencion", mensaje));
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Atención", mensaje));
     }
 
     // ==================== Accesores ====================
 
-    /**
-     * Lo usa JSF para inyectar el acceso a datos. No se llama desde
-     * las vistas.
-     */
-    public void setCitaDAO(CitaDAO citaDAO) {
-        this.citaDAO = citaDAO;
+    /** Lo usa JSF para inyectar la capa de servicio. */
+    public void setCitaServicio(CitaServicio citaServicio) {
+        this.citaServicio = citaServicio;
     }
 
     public List<Medico> getMedicos() {

@@ -2,7 +2,6 @@ package sv.edu.udb.clinica.controlador;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -16,22 +15,44 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
-import sv.edu.udb.clinica.dao.CitaDAO;
 import sv.edu.udb.clinica.dao.MedicoDAO;
 import sv.edu.udb.clinica.dao.PacienteDAO;
 import sv.edu.udb.clinica.modelo.Cita;
 import sv.edu.udb.clinica.modelo.EstadoCita;
 import sv.edu.udb.clinica.modelo.Medico;
 import sv.edu.udb.clinica.modelo.Paciente;
+import sv.edu.udb.clinica.servicio.CitaServicio;
+import sv.edu.udb.clinica.servicio.ServicioExcepcion;
 
 /**
  * Controlador de la pantalla de citas.
  *
- * Reemplaza al Servlet de la Fase 1: recibe lo que hace el usuario,
- * aplica las reglas de negocio y le pide los datos a la capa DAO.
+ * Recibe lo que hace el usuario, se lo pide a la capa de servicio y
+ * muestra el resultado.
+ *
+ * ===================================================================
+ *  Que cambio en la Fase 4
+ * ===================================================================
+ *
+ * Hasta la Fase 3 este archivo aplicaba las reglas de negocio por su
+ * cuenta: comprobaba que la fecha no hubiera pasado, le preguntaba al
+ * DAO si el medico estaba ocupado y decidia si guardar o no. Los
+ * mismos controles, escritos otra vez, estaban en CitaRecurso para la
+ * API.
+ *
+ * Ahora las reglas viven en CitaServicio y aqui no queda ninguna. La
+ * pantalla se limita a lo suyo: recoger lo que el usuario escribio,
+ * pedirle al servicio que lo guarde, y traducir el resultado a un
+ * mensaje en pantalla.
+ *
+ * El beneficio concreto: si mañana la clinica decide que no se pueden
+ * agendar citas los domingos, esa regla se escribe una vez y la
+ * cumplen por igual las pantallas, la API y cualquier cosa que se
+ * agregue despues.
  *
  * ViewScoped: el bean vive mientras el usuario permanezca en la misma
- * pantalla, de modo que los filtros no se pierden entre peticiones AJAX.
+ * pantalla, de modo que los filtros no se pierden entre peticiones
+ * AJAX.
  */
 @ManagedBean(name = "citaBean")
 @ViewScoped
@@ -43,23 +64,27 @@ public class CitaBean implements Serializable {
             DateTimeFormatter.ofPattern("HH:mm");
 
     /**
-     * Acceso a datos de citas.
+     * La capa de servicio, inyectada por Spring.
      *
-     * Antes esta linea decia "new CitaDAO()": la pantalla construia su
-     * propio objeto de acceso a datos y se hacia cargo de el. Ahora lo
-     * recibe ya construido, con su conexion a la base puesta y con las
-     * transacciones administradas por Spring.
+     * Antes aqui habia tres lineas con "new CitaDAO()", "new
+     * PacienteDAO()" y "new MedicoDAO()": la pantalla construia sus
+     * propias herramientas y ademas sabia como usarlas. Ahora recibe
+     * un solo colaborador, ya construido, que es el que sabe.
      *
-     * @ManagedProperty es la forma de JSF de pedir que le inyecten
-     * algo. El texto entre llaves es el nombre con el que Spring
-     * conoce al componente. Funciona gracias al puente que se registro
-     * en el faces-config.xml.
-     *
-     * El campo ya no puede ser "final" porque quien lo rellena es JSF,
-     * despues de construir el bean, usando el setter de mas abajo.
+     * @ManagedProperty es la forma de JSF de pedir una inyeccion. El
+     * texto entre llaves es el nombre con el que Spring conoce al
+     * componente, y funciona gracias al puente registrado en el
+     * faces-config.xml. El campo no puede ser final porque quien lo
+     * rellena es JSF, despues de construir el bean.
      */
-    @ManagedProperty("#{citaDAO}")
-    private CitaDAO citaDAO;
+    @ManagedProperty("#{citaServicio}")
+    private CitaServicio citaServicio;
+
+    /**
+     * Estos dos siguen construyendose a mano porque solo sirven para
+     * llenar los desplegables del formulario, y esos modulos todavia
+     * no se migraron a Spring.
+     */
     private final PacienteDAO pacienteDAO = new PacienteDAO();
     private final MedicoDAO medicoDAO = new MedicoDAO();
 
@@ -90,7 +115,7 @@ public class CitaBean implements Serializable {
     }
 
     private void cargarCitas() {
-        citas = citaDAO.listarCitas();
+        citas = citaServicio.listar();
         citasFiltradas = new ArrayList<>(citas);
     }
 
@@ -152,10 +177,11 @@ public class CitaBean implements Serializable {
     }
 
     public void editar(Cita seleccionada) {
-        cita = citaDAO.buscarPorId(seleccionada.getIdCita());
-        if (cita == null) {
+        try {
+            cita = citaServicio.obtener(seleccionada.getIdCita());
+        } catch (ServicioExcepcion ex) {
             cita = new Cita();
-            error("La cita ya no existe.");
+            error(ex.getMessage());
             return;
         }
         idPacienteSeleccionado = cita.getPaciente() != null
@@ -166,18 +192,16 @@ public class CitaBean implements Serializable {
     }
 
     /**
-     * Guarda la cita despues de aplicar las reglas de negocio.
+     * Guarda la cita.
+     *
+     * Lo unico que se valida aqui es el formato de la hora, porque eso
+     * es cosa de la pantalla: el usuario la escribe como texto y hay
+     * que convertirla antes de pasarsela a nadie. Todo lo demas
+     * (campos obligatorios, fecha pasada, medico ocupado) lo decide el
+     * servicio, y si algo no cumple lo avisa lanzando una excepcion
+     * con el mensaje ya redactado.
      */
     public void guardar() {
-
-        if (idPacienteSeleccionado == null || idMedicoSeleccionado == null) {
-            error("Debe seleccionar el paciente y el medico.");
-            return;
-        }
-        if (cita.getFecha() == null) {
-            error("Debe indicar la fecha de la cita.");
-            return;
-        }
 
         LocalTime hora = interpretarHora(horaStr);
         if (hora == null) {
@@ -186,50 +210,23 @@ public class CitaBean implements Serializable {
         }
         cita.setHora(hora);
 
-        // Regla: no se agenda en una fecha y hora que ya paso
-        LocalDateTime momento = LocalDateTime.of(cita.getFecha(), hora);
-        if (momento.isBefore(LocalDateTime.now())) {
-            error("No se puede agendar una cita en una fecha u hora que ya paso.");
-            return;
-        }
-
-        // Regla HU-12: el medico no puede tener dos citas vigentes a la misma hora
-        if (citaDAO.medicoOcupado(idMedicoSeleccionado, cita.getFecha(),
-                hora, cita.getIdCita())) {
-            error("Ese medico ya tiene una cita agendada el "
-                    + cita.getFechaTexto() + " a las " + horaStr + ".");
-            return;
-        }
-
-        Paciente paciente = pacientes.stream()
-                .filter(p -> Objects.equals(p.getIdPaciente(), idPacienteSeleccionado))
-                .findFirst().orElse(null);
-        Medico medico = medicos.stream()
-                .filter(m -> Objects.equals(m.getIdMedico(), idMedicoSeleccionado))
-                .findFirst().orElse(null);
-
-        if (paciente == null || medico == null) {
-            error("El paciente o el medico seleccionado ya no existe.");
-            return;
-        }
-
-        cita.setPaciente(paciente);
-        cita.setMedico(medico);
-        if (cita.getEstado() == null) {
-            cita.setEstado(EstadoCita.PROGRAMADA);
-        }
-
         try {
-            if (cita.getIdCita() == null) {
-                citaDAO.insertar(cita);
-                info("Cita agendada correctamente.");
+            boolean reprogramada = citaServicio.guardar(
+                    cita, idPacienteSeleccionado, idMedicoSeleccionado);
+
+            if (reprogramada) {
+                info("Cita reprogramada correctamente.");
             } else {
-                citaDAO.actualizar(cita);
-                info("Cita actualizada correctamente.");
+                info("Cita guardada correctamente.");
             }
             cargarCitas();
             filtrar();
             nueva();
+
+        } catch (ServicioExcepcion ex) {
+            // Reglas de negocio y datos invalidos: el mensaje ya viene
+            // redactado para mostrarse tal cual
+            error(ex.getMessage());
         } catch (RuntimeException ex) {
             error("No se pudo guardar la cita: " + ex.getMessage());
         }
@@ -256,10 +253,12 @@ public class CitaBean implements Serializable {
 
     public void cancelar(Cita seleccionada) {
         try {
-            citaDAO.cambiarEstado(seleccionada.getIdCita(), EstadoCita.CANCELADA);
-            info("Cita cancelada. El horario del medico queda libre.");
+            citaServicio.cancelar(seleccionada.getIdCita());
+            info("Cita cancelada. El horario del médico queda libre.");
             cargarCitas();
             filtrar();
+        } catch (ServicioExcepcion ex) {
+            error(ex.getMessage());
         } catch (RuntimeException ex) {
             error("No se pudo cancelar la cita: " + ex.getMessage());
         }
@@ -267,10 +266,12 @@ public class CitaBean implements Serializable {
 
     public void marcarAtendida(Cita seleccionada) {
         try {
-            citaDAO.cambiarEstado(seleccionada.getIdCita(), EstadoCita.ATENDIDA);
+            citaServicio.atender(seleccionada.getIdCita());
             info("Cita marcada como atendida.");
             cargarCitas();
             filtrar();
+        } catch (ServicioExcepcion ex) {
+            error(ex.getMessage());
         } catch (RuntimeException ex) {
             error("No se pudo actualizar la cita: " + ex.getMessage());
         }
@@ -278,10 +279,12 @@ public class CitaBean implements Serializable {
 
     public void eliminar(Cita seleccionada) {
         try {
-            citaDAO.eliminar(seleccionada.getIdCita());
+            citaServicio.eliminar(seleccionada.getIdCita());
             info("Cita eliminada.");
             cargarCitas();
             filtrar();
+        } catch (ServicioExcepcion ex) {
+            error(ex.getMessage());
         } catch (RuntimeException ex) {
             error("No se pudo eliminar la cita: " + ex.getMessage());
         }
@@ -315,17 +318,14 @@ public class CitaBean implements Serializable {
 
     private void error(String mensaje) {
         FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Atencion", mensaje));
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Atención", mensaje));
     }
 
-    // ==================== Accesores y Getters requeridos por la vista ====================
+    // ==================== Accesores requeridos por la vista ====================
 
-    /**
-     * Lo usa JSF para inyectar el acceso a datos. No se llama desde
-     * las vistas.
-     */
-    public void setCitaDAO(CitaDAO citaDAO) {
-        this.citaDAO = citaDAO;
+    /** Lo usa JSF para inyectar la capa de servicio. */
+    public void setCitaServicio(CitaServicio citaServicio) {
+        this.citaServicio = citaServicio;
     }
 
     public EstadoCita[] getEstadosCita() {
